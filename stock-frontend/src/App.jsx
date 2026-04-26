@@ -19,51 +19,50 @@ import Template from "./pages/Template";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
+import ClientPage from "./pages/Client/ClientPage";
 
 export default function App() {
   return (
-    <>
-      <Router>
-        <ScrollToTop />
-        <Routes>
-          {/* Dashboard Layout */}
-          <Route element={<AppLayout />}>
-            <Route index path="/" element={<Home />} />
+    <Router
+      future={{
+        v7_startTransition: true,       // ✅ supprime warning 1
+        v7_relativeSplatPath: true,     // ✅ supprime warning 2
+      }}
+    >
+      <ScrollToTop />
+      <Routes>
 
-            {/* Others Page */}
-            <Route path="/profile" element={<UserProfiles />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/blank" element={<Blank />} />
-            <Route path="/template" element={<Template />} />
-            <Route path="/error-404" element={<NotFound />} />
+        {/* Dashboard Layout - Admin */}
+        <Route element={<AppLayout />}>
+          <Route index path="/" element={<Home />} />
+          <Route path="/profile" element={<UserProfiles />} />
+          <Route path="/calendar" element={<Calendar />} />
+          <Route path="/blank" element={<Blank />} />
+          <Route path="/template" element={<Template />} />
+          <Route path="/error-404" element={<NotFound />} />
+          <Route path="/form-elements" element={<FormElements />} />
+          <Route path="/basic-tables" element={<BasicTables />} />
+          <Route path="/alerts" element={<Alerts />} />
+          <Route path="/avatars" element={<Avatars />} />
+          <Route path="/badge" element={<Badges />} />
+          <Route path="/buttons" element={<Buttons />} />
+          <Route path="/images" element={<Images />} />
+          <Route path="/videos" element={<Videos />} />
+          <Route path="/line-chart" element={<LineChart />} />
+          <Route path="/bar-chart" element={<BarChart />} />
+        </Route>
 
-            {/* Forms */}
-            <Route path="/form-elements" element={<FormElements />} />
+        {/* ✅ Interface Client - HORS AppLayout */}
+        <Route path="/client" element={<ClientPage />} />
 
-            {/* Tables */}
-            <Route path="/basic-tables" element={<BasicTables />} />
+        {/* Auth */}
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
 
-            {/* Ui Elements */}
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/avatars" element={<Avatars />} />
-            <Route path="/badge" element={<Badges />} />
-            <Route path="/buttons" element={<Buttons />} />
-            <Route path="/images" element={<Images />} />
-            <Route path="/videos" element={<Videos />} />
+        {/* Fallback */}
+        <Route path="*" element={<NotFound />} />
 
-            {/* Charts */}
-            <Route path="/line-chart" element={<LineChart />} />
-            <Route path="/bar-chart" element={<BarChart />} />
-          </Route>
-
-          {/* Auth Layout */}
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-
-          {/* Fallback Route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
-    </>
+      </Routes>
+    </Router>
   );
 }
