@@ -22,6 +22,9 @@ import Home from "./pages/Dashboard/Home";
 import ClientPage from "./pages/Client/ClientPage";
 import ShopPage from './pages/Client/ShopPage';
 
+import ProductsAdmin from "./pages/ProductsAdmin";
+import TransactionAdmin from "./pages/TransactionsAdmin";
+import AddProducts from "./pages/AddProducts";
 
 export default function App() {
   return (
@@ -52,12 +55,17 @@ export default function App() {
           <Route path="/videos" element={<Videos />} />
           <Route path="/line-chart" element={<LineChart />} />
           <Route path="/bar-chart" element={<BarChart />} />
+          <Route path="/ProductsAdmin" element={<ProductsAdmin />} />
+          <Route path="/transactionsAdmin" element={<TransactionAdmin />} />
+          <Route path="/ProductsAdmin/AddProducts" element={<AddProducts />} />
+
         </Route>
 
         {/* ✅ Interface Client - HORS AppLayout */}
         <Route path="/client" element={<ClientPage />} />
         <Route path="/shop" element={<ShopPage />} />
 
+        
 
         {/* Auth */}
         <Route path="/signin" element={<SignIn />} />

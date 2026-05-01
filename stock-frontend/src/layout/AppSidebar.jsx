@@ -19,11 +19,22 @@ import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
 
 const navItems = [
+{
+  icon: <GridIcon />,
+  name: "Dashboard",
+  path: "/",
+}
+,
+  // 👇 NOUVEAU MENU E-COMMERCE
   {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    subItems: [{ name: "Ecommerce", path: "/", pro: false }],
+    icon: <BoxCubeIcon />,
+    name: "E-commerce",
+    subItems: [
+      { name: "Products", path: "/ProductsAdmin", pro: false },
+      { name: "Transactions", path: "/transactionsAdmin", pro: false },
+    ],
   },
+
   {
     icon: <CalenderIcon />,
     name: "Calendar",
@@ -54,7 +65,6 @@ const navItems = [
     ],
   },
 ];
-
 const othersItems = [
   {
     icon: <PieChartIcon />,
