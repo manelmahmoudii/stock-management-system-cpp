@@ -1,4 +1,4 @@
 id,name,category,price,quantity,minThreshold
-2,MacBookkkk,Laptop,2000.000000,4,2
+2,MacB,Electronics,2000.000000,4,2
 4,Samsung,Phone,900.000000,13,3
-5,souris+,Accessories,100.000000,20,5
+5,Iphone,Phone,2000.000000,20,5
