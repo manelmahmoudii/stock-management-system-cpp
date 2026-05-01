@@ -21,6 +21,7 @@ import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
 import ClientPage from "./pages/Client/ClientPage";
 import ShopPage from './pages/Client/ShopPage';
+import DeliveryManagement from "./pages/DeliveryManagement";
 
 import ProductsAdmin from "./pages/ProductsAdmin";
 import TransactionAdmin from "./pages/TransactionsAdmin";
@@ -60,7 +61,7 @@ export default function App() {
           <Route path="/ProductsAdmin/AddProducts" element={<AddProducts />} />
 
           <Route path="/ProductsAdmin/EditProduct/:id" element={<EditProduct />} />
-
+<Route path="/delivery" element={<DeliveryManagement />} />
         </Route>
 
         {/* ✅ Interface Client - HORS AppLayout */}
@@ -68,6 +69,7 @@ export default function App() {
         <Route path="/shop" element={<ShopPage />} />
 
         
+
 
         {/* Auth */}
         <Route path="/signin" element={<SignIn />} />

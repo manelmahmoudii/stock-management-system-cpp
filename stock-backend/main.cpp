@@ -60,6 +60,14 @@ svr.Get("/api/transactions", [](const httplib::Request&, httplib::Response& res)
     res.set_content(json, "application/json");
 });
 
+
+// ── POST /api/products/:id/deliver ─── livraison (augmente le stock) ──
+svr.Post("/api/products/:id/deliver", [](const httplib::Request& req, httplib::Response& res) {
+    int id = std::stoi(req.path_params.at("id"));
+    res.set_content(ProductHandler::deliver(id, req.body), "application/json");
+});
+
+
 // ── GET /api/transactions/product/:id ─── transactions par produit ───
 svr.Get("/api/transactions/product/:id", [](const httplib::Request& req, httplib::Response& res) {
     int id = std::stoi(req.path_params.at("id"));
@@ -69,6 +77,9 @@ svr.Get("/api/transactions/product/:id", [](const httplib::Request& req, httplib
     svr.Get("/", [](const httplib::Request&, httplib::Response& res) {
     res.set_content("OK TEST ROUTE WORKS", "text/plain");
 });
+
+
+
     printf("Backend running on http://localhost:8081\n");
     svr.listen("0.0.0.0", 8081);
 

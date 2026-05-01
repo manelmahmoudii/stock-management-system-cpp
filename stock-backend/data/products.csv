@@ -1,3 +1,4 @@
 id,name,category,price,quantity,minThreshold
-2,Macbook,Electronics,2000.000000,1,2
-4,Samsung,Phone,900.000000,11,3
+2,Macbook,Electronics,2000.000000,8,2
+4,Samsung,Phone,900.000000,101,3
+5,KDJF,Electronics,2333.000000,3,5

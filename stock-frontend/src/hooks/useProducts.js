@@ -89,15 +89,32 @@ export function useProducts() {
 
     return data;
   };
-
+// Ajoutez cette fonction dans votre hook
+const deliverProduct = async (productId, quantity) => {
+  const body = new URLSearchParams({ quantity }).toString();
+  const res = await fetch(`${API}/products/${productId}/deliver`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: body,
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  await fetchProducts();
+  return data;
+};
   return { 
     products, 
     loading, 
     error, 
+    
     fetchProducts, 
+    refreshProducts: fetchProducts,
     sellProduct,
     createProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    deliverProduct 
   };
 }

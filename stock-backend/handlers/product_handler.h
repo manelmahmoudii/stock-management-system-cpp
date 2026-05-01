@@ -4,14 +4,14 @@
 #include <vector>
 #include <string>
 #include <sstream>
-#include <map>  // N'OUBLIEZ PAS D'AJOUTER CETTE INCLUSION !
+#include <map>
 #include "transaction_handler.h"
+
 const std::string PRODUCTS_FILE = "data/products.csv";
 const std::string PRODUCTS_HEADER = "id,name,category,price,quantity,minThreshold";
 
 class ProductHandler {
 private:
-    // DÉPLACER parseBody ICI (dans la partie private, AVANT son utilisation)
     static std::map<std::string, std::string> parseBody(const std::string& body) {
         std::map<std::string, std::string> params;
         std::stringstream ss(body);
@@ -26,7 +26,6 @@ private:
     }
 
 public:
-    // ─── READ : récupère tous les produits ───────────────────────────
     static std::string getAll() {
         auto rows = SheetStorage::readAll(PRODUCTS_FILE);
         std::string json = "[";
@@ -38,12 +37,10 @@ public:
         return json;
     }
 
-    // ─── CREATE : ajoute un nouveau produit ─────────────────────────
     static std::string create(const std::string& body) {
         auto params = parseBody(body);
         auto rows = SheetStorage::readAll(PRODUCTS_FILE);
 
-        // Génère un nouvel ID (max existant + 1)
         int newId = 1;
         for (const auto& row : rows) {
             if (!row.empty()) {
@@ -67,21 +64,18 @@ public:
         return p.toJson();
     }
 
-    // Nouvelle méthode pour obtenir un produit par son ID
-static std::pair<std::string, int> getOne(int id) {
-    auto rows = SheetStorage::readAll(PRODUCTS_FILE);
-    for (const auto& row : rows) {
-        if (!row.empty() && std::stoi(row[0]) == id) {
-            return {Product::fromRow(row).toJson(), 200};
+    static std::pair<std::string, int> getOne(int id) {
+        auto rows = SheetStorage::readAll(PRODUCTS_FILE);
+        for (const auto& row : rows) {
+            if (!row.empty() && std::stoi(row[0]) == id) {
+                return {Product::fromRow(row).toJson(), 200};
+            }
         }
+        return {"{\"error\":\"Product not found\"}", 404};
     }
-    return {"{\"error\":\"Product not found\"}", 404};
-}
 
-    // ─── UPDATE : modifie un produit existant ────────────────────────
-  static std::string update(int id, const std::string& body) {
+    static std::string update(int id, const std::string& body) {
         auto params = parseBody(body);
-        // Vérifier que tous les champs nécessaires sont présents
         if (!params.count("name") || !params.count("category") ||
             !params.count("price") || !params.count("quantity") ||
             !params.count("minThreshold")) {
@@ -112,7 +106,7 @@ static std::pair<std::string, int> getOne(int id) {
         SheetStorage::writeAll(PRODUCTS_FILE, PRODUCTS_HEADER, rows);
         return updatedProduct.toJson();
     }
-    // ─── DELETE : supprime un produit ────────────────────────────────
+
     static std::string remove(int id) {
         auto rows = SheetStorage::readAll(PRODUCTS_FILE);
         std::vector<Row> newRows;
@@ -132,45 +126,106 @@ static std::pair<std::string, int> getOne(int id) {
         return "{\"success\":true}";
     }
 
-    // ─── SELL : vente d'un produit ─────────────────────────────
-static std::string sell(int id, const std::string& body) {
-    auto params = parseBody(body);
-    int qty = std::stoi(params["quantity"]);
+    static std::string sell(int id, const std::string& body) {
+        auto params = parseBody(body);
+        int qty = std::stoi(params["quantity"]);
 
-    auto rows = SheetStorage::readAll(PRODUCTS_FILE);
+        auto rows = SheetStorage::readAll(PRODUCTS_FILE);
 
-    for (auto& row : rows) {
-        if (!row.empty() && std::stoi(row[0]) == id) {
-            Product p = Product::fromRow(row);
-            int oldStock = p.quantity;
+        for (auto& row : rows) {
+            if (!row.empty() && std::stoi(row[0]) == id) {
+                Product p = Product::fromRow(row);
+                int oldStock = p.quantity;
 
-            if (p.quantity < qty) {
-                // Enregistrer une transaction échouée
-                TransactionHandler::logTransaction("SALE", id, p.name, qty, oldStock, oldStock, 
-                                                    p.price * qty, "FAILED");
-                return "{\"error\":\"Stock insuffisant\"}";
+                if (p.quantity < qty) {
+                    TransactionHandler::logTransaction("SALE", id, p.name, qty, oldStock, oldStock, 
+                                                        p.price * qty, "FAILED");
+                    return "{\"error\":\"Stock insuffisant\"}";
+                }
+
+                p.quantity -= qty;
+                row = p.toRow();
+                SheetStorage::writeAll(PRODUCTS_FILE, PRODUCTS_HEADER, rows);
+
+                TransactionHandler::logTransaction("SALE", id, p.name, qty, oldStock, p.quantity,
+                                                    p.price * qty, "COMPLETED");
+
+                return "{"
+                    "\"product\":" + p.toJson() + ","
+                    "\"transaction\":{"
+                        "\"type\":\"SALE\","
+                        "\"productId\":" + std::to_string(id) + ","
+                        "\"quantity\":" + std::to_string(qty) + ","
+                        "\"productName\":\"" + p.name + "\","
+                        "\"amount\":" + std::to_string(p.price * qty) +
+                    "}"
+                "}";
             }
-
-            p.quantity -= qty;
-            row = p.toRow();
-            SheetStorage::writeAll(PRODUCTS_FILE, PRODUCTS_HEADER, rows);
-
-            // Enregistrer la transaction réussie
-            TransactionHandler::logTransaction("SALE", id, p.name, qty, oldStock, p.quantity,
-                                                p.price * qty, "COMPLETED");
-
-            return "{"
-                "\"product\":" + p.toJson() + ","
-                "\"transaction\":{"
-                    "\"type\":\"SALE\","
-                    "\"productId\":" + std::to_string(id) + ","
-                    "\"quantity\":" + std::to_string(qty) + ","
-                    "\"productName\":\"" + p.name + "\","
-                    "\"amount\":" + std::to_string(p.price * qty) +
-                "}"
-            "}";
         }
+        return "{\"error\":\"Product not found\"}";
     }
-    return "{\"error\":\"Product not found\"}";
-}
+
+    // product_handler.h - À l'intérieur de la classe ProductHandler
+
+ // ─── DELIVER : livraison d'un produit (augmente la quantité) ─────────
+    static std::string deliver(int id, const std::string& body) {
+        printf("🔵 ===== DELIVER STARTED =====\n");
+        printf("📦 Product ID: %d\n", id);
+        printf("📦 Body: %s\n", body.c_str());
+        
+        auto params = parseBody(body);
+        
+        if (!params.count("quantity")) {
+            printf("❌ Quantity parameter missing\n");
+            return "{\"error\":\"Quantity parameter missing\"}";
+        }
+        
+        int qty = std::stoi(params["quantity"]);
+        printf("📊 Quantity to add: %d\n", qty);
+        
+        if (qty <= 0) {
+            printf("❌ Quantity must be positive\n");
+            return "{\"error\":\"Quantity must be positive\"}";
+        }
+
+        auto rows = SheetStorage::readAll(PRODUCTS_FILE);
+        printf("📋 CSV rows loaded: %zu\n", rows.size());
+
+        for (auto& row : rows) {
+            if (!row.empty()) {
+                int currentId = std::stoi(row[0]);
+                if (currentId == id) {
+                    printf("✅ Product found!\n");
+                    Product p = Product::fromRow(row);
+                    int oldStock = p.quantity;
+                    printf("📊 Old stock: %d\n", oldStock);
+
+                    p.quantity += qty;
+                    printf("📊 New stock: %d\n", p.quantity);
+                    
+                    row = p.toRow();
+                    SheetStorage::writeAll(PRODUCTS_FILE, PRODUCTS_HEADER, rows);
+                    printf("💾 CSV file saved\n");
+
+                    // Enregistrer la transaction de livraison
+                    printf("📝 Logging delivery transaction...\n");
+                    TransactionHandler::logTransaction("DELIVERY", id, p.name, qty, oldStock, p.quantity,
+                                                        p.price * qty, "COMPLETED");
+                    printf("✅ Transaction logged successfully\n");
+
+                    std::string result = "{"
+                        "\"product\":" + p.toJson() + ","
+                        "\"message\":\"Stock updated successfully\","
+                        "\"oldStock\":" + std::to_string(oldStock) + ","
+                        "\"newStock\":" + std::to_string(p.quantity) +
+                    "}";
+                    printf("🎉 Result: %s\n", result.c_str());
+                    return result;
+                }
+            }
+        }
+        
+        printf("❌ Product not found with ID: %d\n", id);
+        return "{\"error\":\"Product not found\"}";
+    }
 };

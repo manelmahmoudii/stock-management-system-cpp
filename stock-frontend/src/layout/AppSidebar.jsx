@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-
+import { ArrowLeftRight, Truck } from "lucide-react";
+import { useProducts } from "../hooks/useProducts"; // Ajoutez cet import
 // Assume these icons are imported from an icon library
 import {
   BoxCubeIcon,
@@ -18,87 +19,29 @@ import {
 import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
 
-const navItems = [
-{
-  icon: <GridIcon />,
-  name: "Dashboard",
-  path: "/",
-}
-,
-  // 👇 NOUVEAU MENU E-COMMERCE
-  {
-    icon: <BoxCubeIcon />,
-    name: "E-commerce",
-    subItems: [
-      { name: "Products", path: "/ProductsAdmin", pro: false },
-      { name: "Transactions", path: "/transactionsAdmin", pro: false },
-    ],
-  },
-
-  {
-    icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/calendar",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/profile",
-  },
-  {
-    name: "Forms",
-    icon: <ListIcon />,
-    subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-  },
-  {
-    name: "Tables",
-    icon: <TableIcon />,
-    subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-  },
-  {
-    name: "Pages",
-    icon: <PageIcon />,
-    subItems: [
-      { name: "Blank Page", path: "/blank", pro: false },
-      { name: "Template", path: "/template", pro: false },
-      { name: "404 Error", path: "/error-404", pro: false },
-    ],
-  },
-];
-const othersItems = [
-  {
-    icon: <PieChartIcon />,
-    name: "Charts",
-    subItems: [
-      { name: "Line Chart", path: "/line-chart", pro: false },
-      { name: "Bar Chart", path: "/bar-chart", pro: false },
-    ],
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "UI Elements",
-    subItems: [
-      { name: "Alerts", path: "/alerts", pro: false },
-      { name: "Avatar", path: "/avatars", pro: false },
-      { name: "Badge", path: "/badge", pro: false },
-      { name: "Buttons", path: "/buttons", pro: false },
-      { name: "Images", path: "/images", pro: false },
-      { name: "Videos", path: "/videos", pro: false },
-    ],
-  },
-  {
-    icon: <PlugInIcon />,
-    name: "Authentication",
-    subItems: [
-      { name: "Sign In", path: "/signin", pro: false },
-      { name: "Sign Up", path: "/signup", pro: false },
-    ],
-  },
-];
+// Composant pour le badge de notification
+const NotificationBadge = ({ count }) => {
+  if (!count || count === 0) return null;
+  return (
+    <span className="ml-auto bg-red-500 text-white text-xs font-medium px-2 py-0.5 rounded-full animate-pulse">
+      {count}
+    </span>
+  );
+};
 
 const AppSidebar = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
+  const { products, loading } = useProducts(); // Récupérer les produits
+  const [needsRestockCount, setNeedsRestockCount] = useState(0);
+
+  // Calculer le nombre de produits à réapprovisionner
+  useEffect(() => {
+    if (!loading && products.length > 0) {
+      const count = products.filter(p => p.quantity <= p.minThreshold).length;
+      setNeedsRestockCount(count);
+    }
+  }, [products, loading]);
 
   const [openSubmenu, setOpenSubmenu] = useState(null);
   const [subMenuHeight, setSubMenuHeight] = useState({});
@@ -154,6 +97,91 @@ const AppSidebar = () => {
       return { type: menuType, index };
     });
   };
+
+  // Menu items avec le badge pour Livraisons
+  const navItems = [
+    {
+      icon: <GridIcon />,
+      name: "Dashboard",
+      path: "/",
+    },
+    {
+      icon: <BoxCubeIcon />,
+      name: "Products",
+      path: "/ProductsAdmin",
+    },
+    {
+      icon: <Truck size={20} />,
+      name: "Livraisons",
+      path: "/delivery",
+      badge: needsRestockCount, // Ajout du badge
+    },
+    {
+      icon: <ArrowLeftRight size={20} />,
+      name: "Transactions",
+      path: "/transactionsAdmin",
+    },
+    {
+      icon: <CalenderIcon />,
+      name: "Calendar",
+      path: "/calendar",
+    },
+    {
+      icon: <UserCircleIcon />,
+      name: "User Profile",
+      path: "/profile",
+    },
+    {
+      name: "Forms",
+      icon: <ListIcon />,
+      subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
+    },
+    {
+      name: "Tables",
+      icon: <TableIcon />,
+      subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
+    },
+    {
+      name: "Pages",
+      icon: <PageIcon />,
+      subItems: [
+        { name: "Blank Page", path: "/blank", pro: false },
+        { name: "Template", path: "/template", pro: false },
+        { name: "404 Error", path: "/error-404", pro: false },
+      ],
+    },
+  ];
+
+  const othersItems = [
+    {
+      icon: <PieChartIcon />,
+      name: "Charts",
+      subItems: [
+        { name: "Line Chart", path: "/line-chart", pro: false },
+        { name: "Bar Chart", path: "/bar-chart", pro: false },
+      ],
+    },
+    {
+      icon: <BoxCubeIcon />,
+      name: "UI Elements",
+      subItems: [
+        { name: "Alerts", path: "/alerts", pro: false },
+        { name: "Avatar", path: "/avatars", pro: false },
+        { name: "Badge", path: "/badge", pro: false },
+        { name: "Buttons", path: "/buttons", pro: false },
+        { name: "Images", path: "/images", pro: false },
+        { name: "Videos", path: "/videos", pro: false },
+      ],
+    },
+    {
+      icon: <PlugInIcon />,
+      name: "Authentication",
+      subItems: [
+        { name: "Sign In", path: "/signin", pro: false },
+        { name: "Sign Up", path: "/signup", pro: false },
+      ],
+    },
+  ];
 
   const renderMenuItems = (items, menuType) => (
     <ul className="flex flex-col gap-4">
@@ -213,7 +241,13 @@ const AppSidebar = () => {
                   {nav.icon}
                 </span>
                 {(isExpanded || isHovered || isMobileOpen) && (
-                  <span className="menu-item-text">{nav.name}</span>
+                  <>
+                    <span className="menu-item-text">{nav.name}</span>
+                    {/* Badge pour l'élément Livraisons */}
+                    {nav.badge > 0 && (
+                      <NotificationBadge count={nav.badge} />
+                    )}
+                  </>
                 )}
               </Link>
             )
