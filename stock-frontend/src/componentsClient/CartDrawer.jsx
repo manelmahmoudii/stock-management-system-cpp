@@ -1,11 +1,67 @@
 // src/componentsClient/CartDrawer.jsx
-import { Fragment } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-export default function CartDrawer({ isOpen, onClose, cartItems, updateQuantity, removeItem }) {
+const API = 'http://localhost:8081/api';
+
+export default function CartDrawer({ 
+  isOpen, 
+  onClose, 
+  cartItems, 
+  updateQuantity, 
+  removeItem 
+}) {
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutMsg, setCheckoutMsg] = useState('');
+
   // Calcul du sous-total et total
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const total = subtotal;
+
+  // ── Checkout : vend chaque article via l'API ─────────────────────────
+  const handleCheckout = async () => {
+    if (cartItems.length === 0) return;
+    setIsCheckingOut(true);
+    setCheckoutMsg('');
+
+    const errors = [];
+
+    for (const item of cartItems) {
+      try {
+        const body = new URLSearchParams({ quantity: item.quantity }).toString();
+        const res = await fetch(`${API}/products/${item.id}/sell`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: body,
+        });
+        const data = await res.json();
+
+        if (data.error) {
+          errors.push(`${item.name} : ${data.error}`);
+        } else {
+          // Transaction disponible pour Personne 3
+          console.log('✅ Transaction enregistrée :', data.transaction);
+        }
+      } catch (error) {
+        errors.push(`${item.name} : erreur réseau`);
+      }
+    }
+
+    setIsCheckingOut(false);
+
+    if (errors.length > 0) {
+      setCheckoutMsg('⚠️ ' + errors.join(' | '));
+    } else {
+      setCheckoutMsg('✅ Commande confirmée ! Merci pour votre achat.');
+      // Vide le panier après succès
+      setTimeout(() => {
+        cartItems.forEach(item => removeItem(item.id));
+        setCheckoutMsg('');
+      }, 2000);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -15,7 +71,9 @@ export default function CartDrawer({ isOpen, onClose, cartItems, updateQuantity,
         <div className="flex h-full flex-col px-4 py-6 sm:px-6 bg-white shadow-xl">
           {/* En-tête */}
           <div className="flex items-center justify-between border-b pb-6 border-gray-100">
-            <h2 className="text-lg font-medium text-gray-900">Your Cart ({cartItems.reduce((sum, i) => sum + i.quantity, 0)})</h2>
+            <h2 className="text-lg font-medium text-gray-900">
+              Your Cart ({cartItems.reduce((sum, i) => sum + i.quantity, 0)})
+            </h2>
             <div className="ml-3 flex h-7 items-center">
               <button
                 type="button"
@@ -30,6 +88,17 @@ export default function CartDrawer({ isOpen, onClose, cartItems, updateQuantity,
               </button>
             </div>
           </div>
+
+          {/* Message checkout */}
+          {checkoutMsg && (
+            <div className={`mt-4 p-3 rounded-lg text-sm font-medium ${
+              checkoutMsg.startsWith('✅') 
+                ? 'bg-green-50 text-green-600' 
+                : 'bg-red-50 text-red-500'
+            }`}>
+              {checkoutMsg}
+            </div>
+          )}
 
           {/* Liste des articles */}
           <div className="flex-1 overflow-y-auto pt-6">
@@ -96,32 +165,42 @@ export default function CartDrawer({ isOpen, onClose, cartItems, updateQuantity,
           </div>
 
           {/* Pied (total et actions) */}
-          <div className="border-t border-gray-100 py-6">
-            <div className="flex justify-between text-base">
-              <p className="font-normal text-gray-500">Subtotal</p>
-              <p className="text-gray-500">${subtotal.toFixed(2)}</p>
+          {cartItems.length > 0 && (
+            <div className="border-t border-gray-100 py-6">
+              <div className="flex justify-between text-base">
+                <p className="font-normal text-gray-500">Subtotal</p>
+                <p className="text-gray-500">${subtotal.toFixed(2)}</p>
+              </div>
+              <div className="flex justify-between text-base font-medium text-gray-900 mt-2">
+                <p>Total</p>
+                <p>${total.toFixed(2)}</p>
+              </div>
+              <div className="mt-6">
+                <button
+                  onClick={onClose}
+                  className="flex w-full items-center h-11 justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Continue Shopping
+                </button>
+              </div>
+              <div className="mt-2">
+                <button
+                  onClick={handleCheckout}
+                  disabled={isCheckingOut}
+                  className="flex w-full items-center justify-center rounded-lg border border-transparent bg-violet-500 px-6 py-3 text-base font-medium text-white h-11 hover:bg-violet-600 disabled:bg-violet-300 disabled:cursor-not-allowed"
+                >
+                  {isCheckingOut ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Processing...
+                    </>
+                  ) : (
+                    'Process to checkout'
+                  )}
+                </button>
+              </div>
             </div>
-            <div className="flex justify-between text-base font-medium text-gray-900 mt-2">
-              <p>Total</p>
-              <p>${total.toFixed(2)}</p>
-            </div>
-            <div className="mt-6">
-              <button
-                onClick={onClose}
-                className="flex w-full items-center h-11 justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 hover:bg-gray-50"
-              >
-                Continue Shopping
-              </button>
-            </div>
-            <div className="mt-2">
-              <Link
-                to="/checkout"
-                className="flex w-full items-center justify-center rounded-lg border border-transparent bg-violet-500 px-6 py-3 text-base font-medium text-white h-11 hover:bg-violet-600"
-              >
-                Process to checkout
-              </Link>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
