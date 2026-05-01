@@ -58,7 +58,9 @@ export default function App() {
           <Route path="/ProductsAdmin" element={<ProductsAdmin />} />
           <Route path="/transactionsAdmin" element={<TransactionAdmin />} />
           <Route path="/ProductsAdmin/AddProducts" element={<AddProducts />} />
+
           <Route path="/ProductsAdmin/EditProduct/:id" element={<EditProduct />} />
+
         </Route>
 
         {/* ✅ Interface Client - HORS AppLayout */}
