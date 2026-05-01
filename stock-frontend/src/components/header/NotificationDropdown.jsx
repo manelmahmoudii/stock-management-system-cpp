@@ -93,7 +93,7 @@ export default function NotificationDropdown() {
           {outOfStockAlerts.length > 0 && (
             <>
               <li className="px-3 py-2 bg-red-50 dark:bg-red-900/20">
-                <span className="text-xs font-semibold text-red-600 dark:text-red-400">RUPTURE DE STOCK</span>
+                <span className="text-xs font-semibold text-red-600 dark:text-red-400">OUT OF STOCK</span>
               </li>
               {outOfStockAlerts.map((product) => (
                 <li key={`out-${product.id}`}>
@@ -111,12 +111,12 @@ export default function NotificationDropdown() {
                         <span className="font-medium text-red-600 dark:text-red-400">
                           {product.name}
                         </span>
-                        <span className="text-gray-600 dark:text-gray-300"> est en rupture de stock !</span>
+                        <span className="text-gray-600 dark:text-gray-300"> is out of stock!</span>
                       </span>
                       <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                        <span>Stock actuel: 0</span>
+                        <span>Current stock: 0</span>
                         <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                        <span>Seuil min: {product.minThreshold}</span>
+                        <span>Minimum threshold: {product.minThreshold}</span>
                       </span>
                     </span>
                   </DropdownItem>
@@ -129,7 +129,7 @@ export default function NotificationDropdown() {
           {lowStockAlerts.length > 0 && (
             <>
               <li className="px-3 py-2 bg-yellow-50 dark:bg-yellow-900/20 mt-2">
-                <span className="text-xs font-semibold text-yellow-600 dark:text-yellow-400">STOCK FAIBLE</span>
+                <span className="text-xs font-semibold text-yellow-600 dark:text-yellow-400">LOW STOCK</span>
               </li>
               {lowStockAlerts.map((product) => (
                 <li key={`low-${product.id}`}>
@@ -147,12 +147,12 @@ export default function NotificationDropdown() {
                         <span className="font-medium text-yellow-600 dark:text-yellow-400">
                           {product.name}
                         </span>
-                        <span className="text-gray-600 dark:text-gray-300"> a un stock faible</span>
+                        <span className="text-gray-600 dark:text-gray-300"> has a low stock</span>
                       </span>
                       <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
                         <span>Stock: {product.quantity}</span>
                         <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                        <span>Seuil: {product.minThreshold}</span>
+                        <span>Threshold: {product.minThreshold}</span>
                       </span>
                     </span>
                   </DropdownItem>
@@ -168,8 +168,8 @@ export default function NotificationDropdown() {
                 <svg className="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Aucune notification</p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Tous les stocks sont bons</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">No notifications</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">All stocks are in good condition</p>
               </div>
             </li>
           )}
@@ -180,7 +180,7 @@ export default function NotificationDropdown() {
           className="block px-4 py-2 mt-3 text-sm font-medium text-center text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
           onClick={closeDropdown}
         >
-          Voir tous les produits
+See all products
         </Link>
       </Dropdown>
     </div>
