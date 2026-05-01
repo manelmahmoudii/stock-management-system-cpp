@@ -37,7 +37,23 @@ export function useProducts() {
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    await fetchProducts(); // Recharge la liste
+    await fetchProducts();
+    return data;
+  };
+
+  // Mise à jour d'un produit
+  const updateProduct = async (productId, productData) => {
+    const body = new URLSearchParams(productData).toString();
+    const res = await fetch(`${API}/products/${productId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body,
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    await fetchProducts();
     return data;
   };
 
@@ -48,7 +64,7 @@ export function useProducts() {
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    await fetchProducts(); // Recharge la liste
+    await fetchProducts();
     return data;
   };
 
@@ -63,7 +79,6 @@ export function useProducts() {
 
     if (data.error) throw new Error(data.error);
 
-    // Met à jour localement sans re-fetch
     setProducts(prev =>
       prev.map(p =>
         p.id === productId
@@ -82,6 +97,7 @@ export function useProducts() {
     fetchProducts, 
     sellProduct,
     createProduct,
+    updateProduct,
     deleteProduct
   };
 }
