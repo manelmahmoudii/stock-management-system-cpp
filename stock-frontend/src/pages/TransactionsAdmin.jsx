@@ -1,103 +1,29 @@
 import { useState } from "react";
-import PageMeta from "../components/common/PageMeta";
-
-const initialTransactions = [
-  {
-    id: "#323537",
-    customer: "Abram Schleifer",
-    email: "abram@example.com",
-    amount: 43999,
-    dueDate: "25 Apr, 2027",
-    status: "Completed",
-  },
-  {
-    id: "#323544",
-    customer: "Ava Smith",
-    email: "ava.smith@example.com",
-    amount: 1200,
-    dueDate: "01 Dec, 2027",
-    status: "Pending",
-  },
-  {
-    id: "#323538",
-    customer: "Carla George",
-    email: "carla65@example.com",
-    amount: 919,
-    dueDate: "11 May, 2027",
-    status: "Completed",
-  },
-  {
-    id: "#323543",
-    customer: "Ekstrom Bothman",
-    email: "ekstrom@example.com",
-    amount: 679,
-    dueDate: "15 Nov, 2027",
-    status: "Completed",
-  },
-  {
-    id: "#323552",
-    customer: "Ella Davis",
-    email: "ella.davis@example.com",
-    amount: 210,
-    dueDate: "01 Mar, 2028",
-    status: "Failed",
-  },
-  {
-    id: "#323539",
-    customer: "Emery Culhane",
-    email: "emery09@example.com",
-    amount: 839,
-    dueDate: "29 Jun, 2027",
-    status: "Completed",
-  },
-  {
-    id: "#323547",
-    customer: "Ethan Patel",
-    email: "ethan.patel@example.com",
-    amount: 2100,
-    dueDate: "05 Jan, 2028",
-    status: "Pending",
-  },
-  {
-    id: "#323553",
-    customer: "James Martinez",
-    email: "james.martinez@example.com",
-    amount: 3300,
-    dueDate: "15 Mar, 2028",
-    status: "Completed",
-  },
-  {
-    id: "#323535",
-    customer: "Kaiya George",
-    email: "kaiya@example.com",
-    amount: 1579,
-    dueDate: "13 Mar, 2027",
-    status: "Failed",
-  },
-  {
-    id: "#323549",
-    customer: "Liam Brown",
-    email: "liam.brown@example.com",
-    amount: 450,
-    dueDate: "28 Jan, 2028",
-    status: "Failed",
-  },
-];
+import { useTransactions } from "../hooks/useTransactions";
 
 const ITEMS_PER_PAGE = 10;
 
 export default function Transactions() {
+  const { transactions, loading, error } = useTransactions();
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRows, setSelectedRows] = useState([]);
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [filterType, setFilterType] = useState("all"); // all, SALE, DELIVERY
 
-  // Filter transactions based on search
-  const filteredTransactions = initialTransactions.filter((tx) =>
-    Object.values(tx).some((value) =>
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  // Filtrage
+  let filteredTransactions = transactions.filter((tx) => {
+    // Filtre par type
+    if (filterType !== "all" && tx.type !== filterType) return false;
+    
+    // Filtre par recherche
+    if (searchTerm) {
+      return tx.productName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+             tx.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+             tx.id?.toString().includes(searchTerm);
+    }
+    return true;
+  });
 
   // Pagination
   const totalPages = Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE);
@@ -106,7 +32,6 @@ export default function Transactions() {
     currentPage * ITEMS_PER_PAGE
   );
 
-  // Helpers
   const toggleSelectAll = () => {
     if (selectedRows.length === paginatedTransactions.length) {
       setSelectedRows([]);
@@ -124,24 +49,22 @@ export default function Transactions() {
   };
 
   const handleExportCSV = () => {
-    // Simple CSV export
-    const headers = ["Order ID", "Customer", "Email", "Total Amount", "Due Date", "Status"];
+    const headers = ["ID", "Type", "Product", "Quantity", "Amount", "Date", "Status"];
     const rows = filteredTransactions.map((tx) => [
       tx.id,
-      tx.customer,
-      tx.email,
-      `$${tx.amount.toLocaleString()}`,
-      tx.dueDate,
+      tx.type,
+      tx.productName,
+      tx.quantity,
+      `$${tx.amount?.toFixed(2) || '0'}`,
+      tx.date,
       tx.status,
     ]);
-    const csvContent = [headers, ...rows]
-      .map((row) => row.join(","))
-      .join("\n");
+    const csvContent = [headers, ...rows].map((row) => row.join(",")).join("\n");
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "transactions.csv";
+    a.download = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -153,85 +76,83 @@ export default function Transactions() {
     }
   };
 
+  const getTypeBadge = (type) => {
+    const base = "text-theme-xs rounded-full px-2 py-0.5 font-medium";
+    if (type === "SALE")
+      return `${base} bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-500`;
+    return `${base} bg-purple-50 text-purple-700 dark:bg-purple-500/15 dark:text-purple-500`;
+  };
+
   const getStatusBadge = (status) => {
     const base = "text-theme-xs rounded-full px-2 py-0.5 font-medium";
-    if (status === "Completed")
-      return `${base} bg-success-50 text-success-700 dark:bg-success-500/15 dark:text-success-500`;
-    if (status === "Pending")
-      return `${base} bg-warning-50 text-warning-700 dark:bg-warning-500/15 dark:text-warning-500`;
+    if (status === "COMPLETED")
+      return `${base} bg-green-50 text-green-700 dark:bg-green-500/15 dark:text-green-500`;
     return `${base} bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-500`;
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-violet-500" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center text-red-500 py-10">
+        <p>{error}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-      {/* Header with search and export */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-800 gap-4">
         <div>
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Transactions
+            Transactions History
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Your most recent transactions list
+            Track all sales and delivery operations
           </p>
         </div>
         <div className="flex gap-3.5">
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">
-              <svg className="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M3.04199 9.37363C3.04199 5.87693 5.87735 3.04199 9.37533 3.04199C12.8733 3.04199 15.7087 5.87693 15.7087 9.37363C15.7087 12.8703 12.8733 15.7053 9.37533 15.7053C5.87735 15.7053 3.04199 12.8703 3.04199 9.37363ZM9.37533 1.54199C5.04926 1.54199 1.54199 5.04817 1.54199 9.37363C1.54199 13.6991 5.04926 17.2053 9.37533 17.2053C11.2676 17.2053 13.0032 16.5344 14.3572 15.4176L17.1773 18.238C17.4702 18.5309 17.945 18.5309 18.2379 18.238C18.5308 17.9451 18.5309 17.4703 18.238 17.1773L15.4182 14.3573C16.5367 13.0033 17.2087 11.2669 17.2087 9.37363C17.2087 5.04817 13.7014 1.54199 9.37533 1.54199Z"
-                  fill="currentColor"
-                />
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+              <svg className="fill-current" width="20" height="20" viewBox="0 0 20 20">
+                <path fillRule="evenodd" clipRule="evenodd" d="M3.04199 9.37363C3.04199 5.87693 5.87735 3.04199 9.37533 3.04199C12.8733 3.04199 15.7087 5.87693 15.7087 9.37363C15.7087 12.8703 12.8733 15.7053 9.37533 15.7053C5.87735 15.7053 3.04199 12.8703 3.04199 9.37363ZM9.37533 1.54199C5.04926 1.54199 1.54199 5.04817 1.54199 9.37363C1.54199 13.6991 5.04926 17.2053 9.37533 17.2053C11.2676 17.2053 13.0032 16.5344 14.3572 15.4176L17.1773 18.238C17.4702 18.5309 17.945 18.5309 18.2379 18.238C18.5308 17.9451 18.5309 17.4703 18.238 17.1773L15.4182 14.3573C16.5367 13.0033 17.2087 11.2669 17.2087 9.37363C17.2087 5.04817 13.7014 1.54199 9.37533 1.54199Z" />
               </svg>
             </span>
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search by product or ID..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              className="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-11 pr-4 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden xl:w-[300px] dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+              className="h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-11 pr-4 text-sm focus:outline-none xl:w-[300px] dark:border-gray-700 dark:bg-gray-900"
             />
           </div>
-          <div className="hidden lg:block relative">
-            <select className="shadow-theme-xs appearance-none focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 pr-11 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
-              <option>Last 7 Days</option>
-              <option>Last 10 Days</option>
-              <option>Last 15 Days</option>
-              <option>Last 30 Days</option>
-            </select>
-            <svg
-              className="absolute text-gray-700 dark:text-gray-400 right-3 top-1/2 -translate-y-1/2 pointer-events-none"
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-            >
-              <path
-                d="M4.79175 8.02075L10.0001 13.2291L15.2084 8.02075"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
+          
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            className="h-11 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900"
+          >
+            <option value="all">All Types</option>
+            <option value="SALE">Sales Only</option>
+            <option value="DELIVERY">Deliveries Only</option>
+          </select>
+
           <button
             onClick={handleExportCSV}
-            className="shadow-theme-xs flex h-11 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-700 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800"
+            className="flex h-11 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-700 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path
-                d="M16.6661 13.3333V15.4166C16.6661 16.1069 16.1064 16.6666 15.4161 16.6666H4.58203C3.89168 16.6666 3.33203 16.1069 3.33203 15.4166V13.3333M10.0004 3.33325L10.0004 13.3333M6.14456 7.18708L9.9986 3.33549L13.8529 7.18708"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
+              <path d="M16.6661 13.3333V15.4166C16.6661 16.1069 16.1064 16.6666 15.4161 16.6666H4.58203C3.89168 16.6666 3.33203 16.1069 3.33203 15.4166V13.3333M10.0004 3.33325L10.0004 13.3333M6.14456 7.18708L9.9986 3.33549L13.8529 7.18708" stroke="currentColor" strokeWidth="1.5"/>
             </svg>
             Export CSV
           </button>
@@ -243,176 +164,62 @@ export default function Transactions() {
         <table className="w-full table-auto">
           <thead>
             <tr className="border-b border-gray-200 dark:border-gray-800">
-              <th className="p-4">
-                <div className="flex w-full items-center gap-3">
-                  <label className="flex cursor-pointer items-center select-none">
-                    <span className="relative">
-                      <input
-                        type="checkbox"
-                        className="sr-only"
-                        checked={
-                          selectedRows.length === paginatedTransactions.length &&
-                          paginatedTransactions.length > 0
-                        }
-                        onChange={toggleSelectAll}
-                      />
-                      <span
-                        className={`flex h-4 w-4 items-center justify-center rounded-sm border-[1.25px] ${
-                          selectedRows.length === paginatedTransactions.length &&
-                          paginatedTransactions.length > 0
-                            ? "bg-brand-500 border-brand-500"
-                            : "border-gray-300 dark:border-gray-700"
-                        }`}
-                      >
-                        <span
-                          className={`opacity-0 ${
-                            selectedRows.length === paginatedTransactions.length &&
-                            paginatedTransactions.length > 0
-                              ? "opacity-100"
-                              : ""
-                          }`}
-                        >
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <path
-                              d="M10 3L4.5 8.5L2 6"
-                              stroke="white"
-                              strokeWidth="1.6666"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </span>
-                      </span>
-                    </span>
-                  </label>
-                  <p className="text-theme-xs font-medium text-gray-500 dark:text-gray-400">
-                    Order ID
-                  </p>
-                </div>
+              <th className="p-4 w-10">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4"
+                  checked={selectedRows.length === paginatedTransactions.length && paginatedTransactions.length > 0}
+                  onChange={toggleSelectAll}
+                />
               </th>
-              <th className="p-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
-                Customer
-              </th>
-              <th className="p-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
-                Email
-              </th>
-              <th className="p-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
-                Total Amount
-              </th>
-              <th className="p-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
-                Due Date
-              </th>
-              <th className="p-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
-                Status
-              </th>
-              <th className="p-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
-                Action
-              </th>
+              <th className="p-4 text-left text-xs font-medium text-gray-500">ID</th>
+              <th className="p-4 text-left text-xs font-medium text-gray-500">Type</th>
+              <th className="p-4 text-left text-xs font-medium text-gray-500">Product</th>
+              <th className="p-4 text-left text-xs font-medium text-gray-500">Quantity</th>
+              <th className="p-4 text-left text-xs font-medium text-gray-500">Amount</th>
+              <th className="p-4 text-left text-xs font-medium text-gray-500">Date</th>
+              <th className="p-4 text-left text-xs font-medium text-gray-500">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
             {paginatedTransactions.map((tx) => (
-              <tr
-                key={tx.id}
-                className="transition hover:bg-gray-50 dark:hover:bg-gray-900"
-              >
-                <td className="p-4 whitespace-nowrap">
-                  <div className="group flex items-center gap-3">
-                    <label className="flex cursor-pointer items-center select-none">
-                      <span className="relative">
-                        <input
-                          type="checkbox"
-                          className="sr-only"
-                          checked={selectedRows.includes(tx.id)}
-                          onChange={() => toggleSelectRow(tx.id)}
-                        />
-                        <span
-                          className={`flex h-4 w-4 items-center justify-center rounded-sm border-[1.25px] ${
-                            selectedRows.includes(tx.id)
-                              ? "bg-brand-500 border-brand-500"
-                              : "border-gray-300 dark:border-gray-700"
-                          }`}
-                        >
-                          <span
-                            className={`opacity-0 ${
-                              selectedRows.includes(tx.id) ? "opacity-100" : ""
-                            }`}
-                          >
-                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                              <path
-                                d="M10 3L4.5 8.5L2 6"
-                                stroke="white"
-                                strokeWidth="1.6666"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          </span>
-                        </span>
-                      </span>
-                    </label>
-                    <a
-                      href="#"
-                      className="text-theme-xs font-medium text-gray-700 group-hover:underline dark:text-gray-400"
-                      onClick={(e) => e.preventDefault()}
-                    >
-                      {tx.id}
-                    </a>
-                  </div>
+              <tr key={tx.id} className="transition hover:bg-gray-50 dark:hover:bg-gray-900">
+                <td className="p-4">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4"
+                    checked={selectedRows.includes(tx.id)}
+                    onChange={() => toggleSelectRow(tx.id)}
+                  />
                 </td>
                 <td className="p-4 whitespace-nowrap">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-400">
-                    {tx.customer}
+                  <span className="text-sm font-mono text-gray-700">#{tx.id}</span>
+                </td>
+                <td className="p-4 whitespace-nowrap">
+                  <span className={getTypeBadge(tx.type)}>{tx.type}</span>
+                </td>
+                <td className="p-4 whitespace-nowrap">
+                  <span className="text-sm font-medium text-gray-700">{tx.productName}</span>
+                </td>
+                <td className="p-4 whitespace-nowrap">
+                  <span className="text-sm text-gray-600">{tx.quantity}</span>
+                </td>
+                <td className="p-4 whitespace-nowrap">
+                  <span className="text-sm font-medium text-gray-700">
+                    ${tx.amount?.toFixed(2) || '0.00'}
                   </span>
                 </td>
                 <td className="p-4 whitespace-nowrap">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{tx.email}</p>
-                </td>
-                <td className="p-4 whitespace-nowrap">
-                  <p className="text-sm text-gray-700 dark:text-gray-400">
-                    ${tx.amount.toLocaleString()}
-                  </p>
-                </td>
-                <td className="p-4 whitespace-nowrap">
-                  <p className="text-sm text-gray-700 dark:text-gray-400">{tx.dueDate}</p>
+                  <span className="text-sm text-gray-500">{tx.date}</span>
                 </td>
                 <td className="p-4 whitespace-nowrap">
                   <span className={getStatusBadge(tx.status)}>{tx.status}</span>
-                </td>
-                <td className="p-4 whitespace-nowrap">
-                  <div className="relative inline-block">
-                    <button
-                      onClick={() => setOpenMenuId(openMenuId === tx.id ? null : tx.id)}
-                      className="text-gray-500 dark:text-gray-400"
-                    >
-                      <svg className="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path
-                          fillRule="evenodd"
-                          clipRule="evenodd"
-                          d="M5.99902 10.245C6.96552 10.245 7.74902 11.0285 7.74902 11.995V12.005C7.74902 12.9715 6.96552 13.755 5.99902 13.755C5.03253 13.755 4.24902 12.9715 4.24902 12.005V11.995C4.24902 11.0285 5.03253 10.245 5.99902 10.245ZM17.999 10.245C18.9655 10.245 19.749 11.0285 19.749 11.995V12.005C19.749 12.9715 18.9655 13.755 17.999 13.755C17.0325 13.755 16.249 12.9715 16.249 12.005V11.995C16.249 11.0285 17.0325 10.245 17.999 10.245ZM13.749 11.995C13.749 11.0285 12.9655 10.245 11.999 10.245C11.0325 10.245 10.249 11.0285 10.249 11.995V12.005C10.249 12.9715 11.0325 13.755 11.999 13.755C12.9655 13.755 13.749 12.9715 13.749 12.005V11.995Z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                    </button>
-                    {openMenuId === tx.id && (
-                      <div className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-2xl border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-800 dark:bg-gray-900">
-                        <div className="space-y-1">
-                          <button className="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5">
-                            View More
-                          </button>
-                          <button className="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5">
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
                 </td>
               </tr>
             ))}
             {paginatedTransactions.length === 0 && (
               <tr>
-                <td colSpan="7" className="p-6 text-center text-gray-500">
+                <td colSpan="8" className="p-6 text-center text-gray-500">
                   No transactions found
                 </td>
               </tr>
@@ -422,64 +229,31 @@ export default function Transactions() {
       </div>
 
       {/* Pagination */}
-      <div className="border-t border-gray-200 px-5 py-4 dark:border-gray-800">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="hidden sm:block text-sm font-medium text-gray-500 dark:text-gray-400">
-            Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to{" "}
-            {Math.min(currentPage * ITEMS_PER_PAGE, filteredTransactions.length)} of{" "}
-            {filteredTransactions.length}
-          </div>
-          <div className="flex w-full items-center justify-between gap-2 rounded-lg bg-gray-50 p-4 sm:w-auto sm:justify-normal sm:rounded-none sm:bg-transparent sm:p-0 dark:bg-gray-900">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="shadow-theme-xs flex items-center gap-2 rounded-lg border border-gray-300 bg-white p-2 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed sm:p-2.5 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M2.58203 9.99868C2.58174 10.1909 2.6549 10.3833 2.80152 10.53L7.79818 15.5301C8.09097 15.8231 8.56584 15.8233 8.85883 15.5305C9.15183 15.2377 9.152 14.7629 8.85921 14.4699L5.13911 10.7472L16.6665 10.7472C17.0807 10.7472 17.4165 10.4114 17.4165 9.99715C17.4165 9.58294 17.0807 9.24715 16.6665 9.24715L5.14456 9.24715L8.85919 5.53016C9.15199 5.23717 9.15184 4.7623 8.85885 4.4695C8.56587 4.1767 8.09099 4.17685 7.79819 4.46984L2.84069 9.43049C2.68224 9.568 2.58203 9.77087 2.58203 9.99715C2.58203 9.99766 2.58203 9.99817 2.58203 9.99868Z"
-                  fill="currentColor"
-                />
-              </svg>
-            </button>
-            <span className="block text-sm font-medium text-gray-700 sm:hidden dark:text-gray-400">
+      {totalPages > 1 && (
+        <div className="border-t border-gray-200 px-5 py-4 dark:border-gray-800">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-sm font-medium text-gray-500">
               Page {currentPage} of {totalPages}
-            </span>
-            <ul className="hidden items-center gap-0.5 sm:flex">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <li key={page}>
-                  <button
-                    onClick={() => handlePageChange(page)}
-                    className={`flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium ${
-                      currentPage === page
-                        ? "bg-brand-500 text-white"
-                        : "text-gray-700 hover:bg-brand-500 hover:text-white dark:text-gray-400"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="shadow-theme-xs flex items-center gap-2 rounded-lg border border-gray-300 bg-white p-2 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed sm:p-2.5 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M17.4165 9.9986C17.4168 10.1909 17.3437 10.3832 17.197 10.53L12.2004 15.5301C11.9076 15.8231 11.4327 15.8233 11.1397 15.5305C10.8467 15.2377 10.8465 14.7629 11.1393 14.4699L14.8594 10.7472L3.33203 10.7472C2.91782 10.7472 2.58203 10.4114 2.58203 9.99715C2.58203 9.58294 2.91782 9.24715 3.33203 9.24715L14.854 9.24715L11.1393 5.53016C10.8465 5.23717 10.8467 4.7623 11.1397 4.4695C11.4327 4.1767 11.9075 4.17685 12.2003 4.46984L17.1578 9.43049C17.3163 9.568 17.4165 9.77087 17.4165 9.99715C17.4165 9.99763 17.4165 9.99812 17.4165 9.9986Z"
-                  fill="currentColor"
-                />
-              </svg>
-            </button>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

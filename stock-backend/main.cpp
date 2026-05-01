@@ -2,6 +2,7 @@
 #include "handlers/product_handler.h"
 #include <iostream>
 #include <filesystem>
+#include "handlers/transaction_handler.h"
 
 int main() {
     // Crée le dossier data/ si inexistant
@@ -51,6 +52,20 @@ int main() {
         res.set_content(ProductHandler::sell(id, req.body), "application/json");
     });
 
+
+    
+// ── GET /api/transactions ─── liste toutes les transactions ──────────
+svr.Get("/api/transactions", [](const httplib::Request&, httplib::Response& res) {
+    std::string json = TransactionHandler::getAll();
+    res.set_content(json, "application/json");
+});
+
+// ── GET /api/transactions/product/:id ─── transactions par produit ───
+svr.Get("/api/transactions/product/:id", [](const httplib::Request& req, httplib::Response& res) {
+    int id = std::stoi(req.path_params.at("id"));
+    std::string json = TransactionHandler::getByProductId(id);
+    res.set_content(json, "application/json");
+});
     svr.Get("/", [](const httplib::Request&, httplib::Response& res) {
     res.set_content("OK TEST ROUTE WORKS", "text/plain");
 });

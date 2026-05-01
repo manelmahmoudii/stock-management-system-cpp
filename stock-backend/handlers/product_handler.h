@@ -5,7 +5,7 @@
 #include <string>
 #include <sstream>
 #include <map>  // N'OUBLIEZ PAS D'AJOUTER CETTE INCLUSION !
-
+#include "transaction_handler.h"
 const std::string PRODUCTS_FILE = "data/products.csv";
 const std::string PRODUCTS_HEADER = "id,name,category,price,quantity,minThreshold";
 
@@ -133,35 +133,44 @@ static std::pair<std::string, int> getOne(int id) {
     }
 
     // ─── SELL : vente d'un produit ─────────────────────────────
-    static std::string sell(int id, const std::string& body) {
-        auto params = parseBody(body);
-        int qty = std::stoi(params["quantity"]);
+static std::string sell(int id, const std::string& body) {
+    auto params = parseBody(body);
+    int qty = std::stoi(params["quantity"]);
 
-        auto rows = SheetStorage::readAll(PRODUCTS_FILE);
+    auto rows = SheetStorage::readAll(PRODUCTS_FILE);
 
-        for (auto& row : rows) {
-            if (!row.empty() && std::stoi(row[0]) == id) {
-                Product p = Product::fromRow(row);
+    for (auto& row : rows) {
+        if (!row.empty() && std::stoi(row[0]) == id) {
+            Product p = Product::fromRow(row);
+            int oldStock = p.quantity;
 
-                if (p.quantity < qty) {
-                    return "{\"error\":\"Stock insuffisant\"}";
-                }
-
-                p.quantity -= qty;
-                row = p.toRow();
-                SheetStorage::writeAll(PRODUCTS_FILE, PRODUCTS_HEADER, rows);
-
-                return "{"
-                    "\"product\":" + p.toJson() + ","
-                    "\"transaction\":{"
-                        "\"type\":\"SALE\","
-                        "\"productId\":" + std::to_string(id) + ","
-                        "\"quantity\":" + std::to_string(qty) + ","
-                        "\"productName\":\"" + p.name + "\""
-                    "}"
-                "}";
+            if (p.quantity < qty) {
+                // Enregistrer une transaction échouée
+                TransactionHandler::logTransaction("SALE", id, p.name, qty, oldStock, oldStock, 
+                                                    p.price * qty, "FAILED");
+                return "{\"error\":\"Stock insuffisant\"}";
             }
+
+            p.quantity -= qty;
+            row = p.toRow();
+            SheetStorage::writeAll(PRODUCTS_FILE, PRODUCTS_HEADER, rows);
+
+            // Enregistrer la transaction réussie
+            TransactionHandler::logTransaction("SALE", id, p.name, qty, oldStock, p.quantity,
+                                                p.price * qty, "COMPLETED");
+
+            return "{"
+                "\"product\":" + p.toJson() + ","
+                "\"transaction\":{"
+                    "\"type\":\"SALE\","
+                    "\"productId\":" + std::to_string(id) + ","
+                    "\"quantity\":" + std::to_string(qty) + ","
+                    "\"productName\":\"" + p.name + "\","
+                    "\"amount\":" + std::to_string(p.price * qty) +
+                "}"
+            "}";
         }
-        return "{\"error\":\"Product not found\"}";
     }
+    return "{\"error\":\"Product not found\"}";
+}
 };
