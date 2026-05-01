@@ -26,6 +26,8 @@ int main() {
         res.set_content(ProductHandler::getAll(), "application/json");
     });
 
+ 
+
     // ── POST /api/products ─── créer un produit ───────────────────────
     svr.Post("/api/products", [](const httplib::Request& req, httplib::Response& res) {
         res.set_content(ProductHandler::create(req.body), "application/json");
