@@ -25,7 +25,34 @@ export function useProducts() {
 
   useEffect(() => { fetchProducts(); }, []);
 
-  // Vente d'un produit — appelé depuis CartDrawer au checkout
+  // Création d'un produit
+  const createProduct = async (productData) => {
+    const body = new URLSearchParams(productData).toString();
+    const res = await fetch(`${API}/products`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body,
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    await fetchProducts(); // Recharge la liste
+    return data;
+  };
+
+  // Suppression d'un produit
+  const deleteProduct = async (productId) => {
+    const res = await fetch(`${API}/products/${productId}`, {
+      method: 'DELETE',
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    await fetchProducts(); // Recharge la liste
+    return data;
+  };
+
+  // Vente d'un produit
   const sellProduct = async (productId, quantity) => {
     const body = new URLSearchParams({ quantity }).toString();
     const res  = await fetch(`${API}/products/${productId}/sell`, {
@@ -45,8 +72,16 @@ export function useProducts() {
       )
     );
 
-    return data; // { product, transaction }
+    return data;
   };
 
-  return { products, loading, error, fetchProducts, sellProduct };
+  return { 
+    products, 
+    loading, 
+    error, 
+    fetchProducts, 
+    sellProduct,
+    createProduct,
+    deleteProduct
+  };
 }

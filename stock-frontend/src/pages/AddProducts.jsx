@@ -1,6 +1,41 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useProducts } from "../hooks/useProducts";
+
 const AddProduct = () => {
+  const navigate = useNavigate();
+  const { createProduct } = useProducts();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    category: "",
+    price: "",
+    quantity: "",
+    minThreshold: "5"
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      await createProduct(formData);
+      alert("Produit créé avec succès !");
+      navigate("/ProductsAdmin");
+    } catch (error) {
+      alert("Erreur lors de la création : " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="p-4 pb-20 mx-auto max-w-(--breakpoint-2xl) md:p-6 md:pb-24">
       {/* Header */}
@@ -12,27 +47,14 @@ const AddProduct = () => {
         <nav>
           <ol className="flex items-center gap-1.5">
             <Link
-  to="/ProductsAdmin"
-  className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400"
->
-  Back
-  <svg
-    className="stroke-current"
-    width="17"
-    height="16"
-    viewBox="0 0 17 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M6.0765 12.667L10.2432 8.50033L6.0765 4.33366"
-      stroke="currentColor"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-</Link>
+              to="/ProductsAdmin"
+              className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400"
+            >
+              Back
+              <svg className="stroke-current" width="17" height="16" viewBox="0 0 17 16" fill="none">
+                <path d="M6.0765 12.667L10.2432 8.50033L6.0765 4.33366" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </Link>
             <li className="text-sm text-gray-800 dark:text-white/90">
               Add Product
             </li>
@@ -50,16 +72,20 @@ const AddProduct = () => {
           </div>
 
           <div className="p-4 sm:p-6">
-            <form>
+            <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                 
                 {/* Product Name */}
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                    Product Name
+                    Product Name *
                   </label>
                   <input
                     type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
                     placeholder="Enter product name"
                     className="h-11 w-full rounded-lg border px-4 py-2.5 text-sm bg-transparent border-gray-300 dark:border-gray-700 dark:bg-gray-900"
                   />
@@ -68,68 +94,94 @@ const AddProduct = () => {
                 {/* Category */}
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                    Category
+                    Category *
                   </label>
-                  <select className="h-11 w-full rounded-lg border px-4 py-2.5 bg-transparent border-gray-300 dark:border-gray-700 dark:bg-gray-900">
-                    <option>Select a category</option>
-                    <option>Laptop</option>
-                    <option>Phone</option>
-                    <option>Watch</option>
-                    <option>Electronics</option>
+                  <select 
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    required
+                    className="h-11 w-full rounded-lg border px-4 py-2.5 bg-transparent border-gray-300 dark:border-gray-700 dark:bg-gray-900"
+                  >
+                    <option value="">Select a category</option>
+                    <option value="Laptop">Laptop</option>
+                    <option value="Phone">Phone</option>
+                    <option value="Watch">Watch</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Accessories">Accessories</option>
+                    <option value="Audio">Audio</option>
+                    <option value="Camera">Camera</option>
                   </select>
                 </div>
 
-                {/* Brand */}
+                {/* Price */}
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                    Brand
+                    Price *
                   </label>
-                  <select className="h-11 w-full rounded-lg border px-4 py-2.5 bg-transparent border-gray-300 dark:border-gray-700 dark:bg-gray-900">
-                    <option>Select brand</option>
-                    <option>Apple</option>
-                    <option>Samsung</option>
-                    <option>LG</option>
-                  </select>
+                  <input
+                    type="number"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleChange}
+                    required
+                    step="0.01"
+                    placeholder="Enter price"
+                    className="h-11 w-full rounded-lg border px-4 py-2.5 text-sm bg-transparent border-gray-300 dark:border-gray-700 dark:bg-gray-900"
+                  />
                 </div>
 
-                {/* Color */}
+                {/* Quantity */}
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                    Color
+                    Quantity *
                   </label>
-                  <select className="h-11 w-full rounded-lg border px-4 py-2.5 bg-transparent border-gray-300 dark:border-gray-700 dark:bg-gray-900">
-                    <option>Select color</option>
-                    <option>Silver</option>
-                    <option>Black</option>
-                    <option>White</option>
-                    <option>Gray</option>
-                  </select>
+                  <input
+                    type="number"
+                    name="quantity"
+                    value={formData.quantity}
+                    onChange={handleChange}
+                    required
+                    placeholder="Enter quantity"
+                    className="h-11 w-full rounded-lg border px-4 py-2.5 text-sm bg-transparent border-gray-300 dark:border-gray-700 dark:bg-gray-900"
+                  />
                 </div>
 
-                {/* Description */}
-                <div className="col-span-full">
+                {/* Min Threshold */}
+                <div>
                   <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                    Description
+                    Minimum Stock Threshold
                   </label>
-                  <textarea
-                    rows="6"
-                    placeholder="Receipt Info (optional)"
-                    className="w-full rounded-lg border px-4 py-2.5 bg-transparent border-gray-300 dark:border-gray-700 dark:bg-gray-900"
+                  <input
+                    type="number"
+                    name="minThreshold"
+                    value={formData.minThreshold}
+                    onChange={handleChange}
+                    placeholder="Alert when stock below"
+                    className="h-11 w-full rounded-lg border px-4 py-2.5 text-sm bg-transparent border-gray-300 dark:border-gray-700 dark:bg-gray-900"
                   />
                 </div>
               </div>
+
+              {/* Buttons */}
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-end mt-6">
+                <button
+                  type="button"
+                  onClick={() => navigate("/ProductsAdmin")}
+                  className="px-5 py-3.5 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 dark:border-gray-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-5 py-3.5 text-sm rounded-lg bg-violet-500 text-white hover:bg-violet-600 disabled:bg-violet-300 disabled:cursor-not-allowed"
+                >
+                  {loading ? "Creating..." : "Publish Product"}
+                </button>
+              </div>
             </form>
           </div>
-        </div>
-
-        {/* Buttons */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-          <button className="px-5 py-3.5 text-sm rounded-lg border">
-            Draft
-          </button>
-          <button className="px-5 py-3.5 text-sm rounded-lg bg-blue-500 text-white">
-            Publish Product
-          </button>
         </div>
       </div>
     </div>
