@@ -306,7 +306,7 @@ export default function ProductList() {
                     {openMenuId === product.id && (
                       <div className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-2xl border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-800 dark:bg-gray-900">
                         <div className="space-y-1">
-                          <Link to={`/ProductsAdmin/EditProduct/${product.id}`} className="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5">
+                          <Link to={`/ProductsAdmin/AddProducts/${product.id}`} className="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5">
                             Edit
                           </Link>
                           <button 

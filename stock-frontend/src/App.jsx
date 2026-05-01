@@ -58,6 +58,7 @@ export default function App() {
           <Route path="/ProductsAdmin" element={<ProductsAdmin />} />
           <Route path="/transactionsAdmin" element={<TransactionAdmin />} />
           <Route path="/ProductsAdmin/AddProducts" element={<AddProducts />} />
+<Route path="/ProductsAdmin/AddProducts/:id" element={<AddProducts />} />  {/* ← ajouter */}
 
         </Route>
 

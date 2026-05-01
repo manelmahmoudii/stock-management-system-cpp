@@ -26,6 +26,14 @@ int main() {
         res.set_content(ProductHandler::getAll(), "application/json");
     });
 
+       // ── GET /api/products/:id ─── récupère un produit ─────────────
+svr.Get("/api/products/:id", [](const Request& req, Response& res) {
+    int id = std::stoi(req.path_params.at("id"));
+    auto [body, status] = ProductHandler::getOne(id);
+    res.status = status;
+    res.set_content(body, "application/json");
+});
+
     // ── POST /api/products ─── créer un produit ───────────────────────
     svr.Post("/api/products", [](const httplib::Request& req, httplib::Response& res) {
         res.set_content(ProductHandler::create(req.body), "application/json");

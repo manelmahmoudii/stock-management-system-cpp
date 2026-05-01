@@ -67,29 +67,51 @@ public:
         return p.toJson();
     }
 
+    // Nouvelle méthode pour obtenir un produit par son ID
+static std::pair<std::string, int> getOne(int id) {
+    auto rows = SheetStorage::readAll(PRODUCTS_FILE);
+    for (const auto& row : rows) {
+        if (!row.empty() && std::stoi(row[0]) == id) {
+            return {Product::fromRow(row).toJson(), 200};
+        }
+    }
+    return {"{\"error\":\"Product not found\"}", 404};
+}
+
     // ─── UPDATE : modifie un produit existant ────────────────────────
-    static std::string update(int id, const std::string& body) {
+  static std::string update(int id, const std::string& body) {
         auto params = parseBody(body);
+        // Vérifier que tous les champs nécessaires sont présents
+        if (!params.count("name") || !params.count("category") ||
+            !params.count("price") || !params.count("quantity") ||
+            !params.count("minThreshold")) {
+            return "{\"error\":\"Missing required fields for update\"}";
+        }
+
         auto rows = SheetStorage::readAll(PRODUCTS_FILE);
+        bool found = false;
+        Product updatedProduct(
+            id,
+            params["name"],
+            params["category"],
+            std::stod(params["price"]),
+            std::stoi(params["quantity"]),
+            std::stoi(params["minThreshold"])
+        );
 
         for (auto& row : rows) {
             if (!row.empty() && std::stoi(row[0]) == id) {
-                Product p = Product::fromRow(row);
-
-                if (params.count("name"))         p.name = params["name"];
-                if (params.count("category"))     p.category = params["category"];
-                if (params.count("price"))        p.price = std::stod(params["price"]);
-                if (params.count("quantity"))     p.quantity = std::stoi(params["quantity"]);
-                if (params.count("minThreshold")) p.minThreshold = std::stoi(params["minThreshold"]);
-
-                row = p.toRow();
-                SheetStorage::writeAll(PRODUCTS_FILE, PRODUCTS_HEADER, rows);
-                return p.toJson();
+                row = updatedProduct.toRow();
+                found = true;
+                break;
             }
         }
-        return "{\"error\":\"Product not found\"}";
-    }
 
+        if (!found) return "{\"error\":\"Product not found\"}";
+
+        SheetStorage::writeAll(PRODUCTS_FILE, PRODUCTS_HEADER, rows);
+        return updatedProduct.toJson();
+    }
     // ─── DELETE : supprime un produit ────────────────────────────────
     static std::string remove(int id) {
         auto rows = SheetStorage::readAll(PRODUCTS_FILE);
