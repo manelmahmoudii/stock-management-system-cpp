@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowLeftRight, Truck } from "lucide-react";
-import { useProducts } from "../hooks/useProducts"; // Ajoutez cet import
+import { useProducts } from "../hooks/useProducts";
 // Assume these icons are imported from an icon library
 import {
   BoxCubeIcon,
@@ -32,7 +32,7 @@ const NotificationBadge = ({ count }) => {
 const AppSidebar = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
-  const { products, loading } = useProducts(); // Récupérer les produits
+  const { products, loading } = useProducts();
   const [needsRestockCount, setNeedsRestockCount] = useState(0);
 
   // Calculer le nombre de produits à réapprovisionner
@@ -114,7 +114,7 @@ const AppSidebar = () => {
       icon: <Truck size={20} />,
       name: "Livraisons",
       path: "/delivery",
-      badge: needsRestockCount, // Ajout du badge
+      badge: needsRestockCount,
     },
     {
       icon: <ArrowLeftRight size={20} />,
@@ -243,7 +243,6 @@ const AppSidebar = () => {
                 {(isExpanded || isHovered || isMobileOpen) && (
                   <>
                     <span className="menu-item-text">{nav.name}</span>
-                    {/* Badge pour l'élément Livraisons */}
                     {nav.badge > 0 && (
                       <NotificationBadge count={nav.badge} />
                     )}
@@ -328,36 +327,24 @@ const AppSidebar = () => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div
-        className={`py-8 flex ${
+        className={`py-8 flex items-center ${
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
         }`}
       >
-        <Link to="/">
-          {isExpanded || isHovered || isMobileOpen ? (
-            <>
-              <img
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-              <img
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-            </>
-          ) : (
-            <img
-              src="/images/logo/logo-icon.svg"
-              alt="Logo"
-              width={32}
-              height={32}
-            />
-          )}
+        <Link to="/" className="flex items-center gap-3">
+          {/* Logo */}
+          <img
+            src="/images/logo/logo-icon.svg"
+            alt="Logo"
+            className="w-8 h-8"
+          />
+          
+          {/* Nom TechMarket - visible seulement quand la sidebar est expansée */}
+         {(isExpanded || isHovered || isMobileOpen) && (
+  <span className="text-xl font-bold text-gray-700 dark:text-gray-100">
+    TechMarket
+  </span>
+)}
         </Link>
       </div>
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">

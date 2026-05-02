@@ -1,7 +1,7 @@
 // src/components/Header.jsx
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import logo from '/client/imagesClient/logo/header-logo.svg';
+import logo from '/client/imagesClient/logo/logo-icon.svg';
 
 export default function Header() {
   const [cartCount] = useState(1);
@@ -60,10 +60,13 @@ export default function Header() {
               </svg>
             </button>
 
-            {/* Logo */}
+            {/* Logo + TechMarket */}
             <div className="flex items-center">
-              <Link to="/">
+              <Link to="/" className="flex items-center gap-2.5">
                 <img className="logo-img h-7 w-auto" alt="TechSelf Logo" src={logo} />
+                <span className="text-xl font-bold text-gray-800 hidden sm:inline-block">
+                  TechMarket
+                </span>
               </Link>
               <div className="relative ml-6 hidden lg:block">
                 <input
@@ -79,72 +82,71 @@ export default function Header() {
               </div>
             </div>
 
-            {/* Liens desktop */}
-          <div className="hidden lg:flex items-center">
-  <Link className="text-gray-800 hover:text-violet-500 py-7 px-3.5 text-base font-medium transition-colors" to="/client">Home</Link>
-  <Link className="text-gray-800 hover:text-violet-500 py-7 px-3.5 text-base font-medium transition-colors" to="/shop">Shop</Link>
+            {/* Liens desktop (reste identique) */}
+            <div className="hidden lg:flex items-center">
+              <Link className="text-gray-800 hover:text-violet-500 py-7 px-3.5 text-base font-medium transition-colors" to="/client">Home</Link>
+              <Link className="text-gray-800 hover:text-violet-500 py-7 px-3.5 text-base font-medium transition-colors" to="/shop">Shop</Link>
 
-  <div className="group px-3.5 py-7">
-    <Link className="inline-flex items-center text-gray-800 transition-all cursor-pointer group-hover:text-violet-500 text-base font-medium" to="/shop" data-discover="true">
-      Products
-      <svg className="transition-transform duration-300 group-hover:rotate-180" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path d="M4.79175 7.39575L10.0001 12.6041L15.2084 7.39575" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </Link>
-    <div className="absolute left-0 right-0 border-t mt-7 w-full py-7 border-gray-100 bg-white z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col xl:flex-row divide-y xl:divide-y-0 xl:divide-x divide-gray-100 gap-7">
-          <div className="xl:w-2/3 flex divide-x divide-gray-100 pb-7">
-            <div className="pr-7 w-1/3">
-              <h3 className="text-gray-800 text-xl mb-3 font-medium">Smart Devices</h3>
-              <div className="space-y-3">
-                <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">T-Shirts</Link>
-                <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Hoodies</Link>
-                <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Pants &amp; Shorts</Link>
-                <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Jackets</Link>
-                <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Shoes</Link>
+              <div className="group px-3.5 py-7">
+                <Link className="inline-flex items-center text-gray-800 transition-all cursor-pointer group-hover:text-violet-500 text-base font-medium" to="/shop" data-discover="true">
+                  Products
+                  <svg className="transition-transform duration-300 group-hover:rotate-180" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M4.79175 7.39575L10.0001 12.6041L15.2084 7.39575" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
+                <div className="absolute left-0 right-0 border-t mt-7 w-full py-7 border-gray-100 bg-white z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex flex-col xl:flex-row divide-y xl:divide-y-0 xl:divide-x divide-gray-100 gap-7">
+                      <div className="xl:w-2/3 flex divide-x divide-gray-100 pb-7">
+                        <div className="pr-7 w-1/3">
+                          <h3 className="text-gray-800 text-xl mb-3 font-medium">Smart Devices</h3>
+                          <div className="space-y-3">
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">T-Shirts</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Hoodies</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Pants &amp; Shorts</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Jackets</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Shoes</Link>
+                          </div>
+                        </div>
+                        <div className="px-7 w-1/3">
+                          <h3 className="text-gray-800 text-xl mb-3 font-medium">Audio &amp; Entertainment</h3>
+                          <div className="space-y-3">
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Dresses</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Tops &amp; Blouses</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Skirts &amp; Pants</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Outerwear</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Heels &amp; Flats</Link>
+                          </div>
+                        </div>
+                        <div className="px-7 w-1/3">
+                          <h3 className="text-gray-800 text-xl mb-3 font-medium">Accessories</h3>
+                          <div className="space-y-3">
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Dresses</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Tops &amp; Blouses</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Skirts &amp; Pants</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Outerwear</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Heels &amp; Flats</Link>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="xl:w-1/3">
+                        <div className="pl-7 relative">
+                          <img className="rounded-lg w-full" alt="" src="/client/imagesClient/menu-image.jpg" />
+                          <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
+                            <Link className="bg-white py-2.5 px-3.5 rounded-lg hover:bg-gray-100 text-gray-800 border border-gray-300 font-medium text-sm" to="/shop" data-discover="true">Best Seller</Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="px-7 w-1/3">
-              <h3 className="text-gray-800 text-xl mb-3 font-medium">Audio &amp; Entertainment</h3>
-              <div className="space-y-3">
-                <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Dresses</Link>
-                <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Tops &amp; Blouses</Link>
-                <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Skirts &amp; Pants</Link>
-                <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Outerwear</Link>
-                <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Heels &amp; Flats</Link>
-              </div>
-            </div>
-            <div className="px-7 w-1/3">
-              <h3 className="text-gray-800 text-xl mb-3 font-medium">Accessories</h3>
-              <div className="space-y-3">
-                <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Dresses</Link>
-                <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Tops &amp; Blouses</Link>
-                <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Skirts &amp; Pants</Link>
-                <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Outerwear</Link>
-                <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Heels &amp; Flats</Link>
-              </div>
-            </div>
-          </div>
-          <div className="xl:w-1/3">
-            <div className="pl-7 relative">
-              <img className="rounded-lg w-full" alt="" src="/client/imagesClient/menu-image.jpg" />
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
-                <Link className="bg-white py-2.5 px-3.5 rounded-lg hover:bg-gray-100 text-gray-800 border border-gray-300 font-medium text-sm" to="/shop" data-discover="true">Best Seller</Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <Link className="text-gray-800 hover:text-violet-500 py-7 px-3.5 text-base font-medium transition-colors" to="/shop?filter=sale">
-    Sale
-    <span className="bg-violet-50 text-violet-700 inline-flex items-center justify-center h-5 rounded-full px-2 py-1 text-xs font-medium z-10 ml-1">20% OFF</span>
-  </Link>
-</div>
-
+              <Link className="text-gray-800 hover:text-violet-500 py-7 px-3.5 text-base font-medium transition-colors" to="/shop?filter=sale">
+                Sale
+                <span className="bg-violet-50 text-violet-700 inline-flex items-center justify-center h-5 rounded-full px-2 py-1 text-xs font-medium z-10 ml-1">20% OFF</span>
+              </Link>
+            </div>
 
             {/* Icônes desktop */}
             <div className="lg:flex items-center space-x-5 hidden">
