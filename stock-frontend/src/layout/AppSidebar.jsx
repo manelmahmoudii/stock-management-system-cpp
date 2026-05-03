@@ -24,6 +24,7 @@ const navItems = [
   name: "Dashboard",
   path: "/",
 }
+
 ,
   // 👇 NOUVEAU MENU E-COMMERCE
   {
@@ -34,6 +35,13 @@ const navItems = [
       { name: "Transactions", path: "/transactionsAdmin", pro: false },
     ],
   },
+
+  {
+  icon: <UserCircleIcon />,
+  name: "Client",
+  path: "/UserList",
+}
+,
 
   {
     icon: <CalenderIcon />,

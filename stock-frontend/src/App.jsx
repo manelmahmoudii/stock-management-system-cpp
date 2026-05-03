@@ -25,6 +25,7 @@ import ShopPage from './pages/Client/ShopPage';
 import ProductsAdmin from "./pages/ProductsAdmin";
 import TransactionAdmin from "./pages/TransactionsAdmin";
 import AddProducts from "./pages/AddProducts";
+import UserList from "./pages/AuthPages/UserList"
 
 export default function App() {
   return (
@@ -58,7 +59,9 @@ export default function App() {
           <Route path="/ProductsAdmin" element={<ProductsAdmin />} />
           <Route path="/transactionsAdmin" element={<TransactionAdmin />} />
           <Route path="/ProductsAdmin/AddProducts" element={<AddProducts />} />
-<Route path="/ProductsAdmin/AddProducts/:id" element={<AddProducts />} />  {/* ← ajouter */}
+          <Route path="/ProductsAdmin/AddProducts/:id" element={<AddProducts />} />  {/* ← ajouter */}
+          <Route path="UserList" element={<UserList />} />  {/* ← ajouter */}
+
 
         </Route>
 
