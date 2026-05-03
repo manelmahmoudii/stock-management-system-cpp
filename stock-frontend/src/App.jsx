@@ -161,12 +161,12 @@ export default function App() {
 
           {/* Routes Client (protégées, nécessitent rôle client ou admin) */}
           <Route path="/client" element={
-            <ProtectedRoute allowedRoles={['client', 'admin']}>
+            <ProtectedRoute allowedRoles={['client']}>
               <ClientPage />
             </ProtectedRoute>
           } />
           <Route path="/shop" element={
-            <ProtectedRoute allowedRoles={['client', 'admin']}>
+            <ProtectedRoute allowedRoles={['client']}>
               <ShopPage />
             </ProtectedRoute>
           } />

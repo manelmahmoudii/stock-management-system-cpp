@@ -1,8 +1,13 @@
-// src/componentsClient/CartDrawer.jsx
+// src/componentsClient/CartDrawer.jsx - Ajoutez triggerCartUpdate
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const API = 'http://localhost:8081/api';
+
+// Fonction pour déclencher la mise à jour du compteur
+const triggerCartUpdate = () => {
+  window.dispatchEvent(new Event('cartUpdated'));
+};
 
 export default function CartDrawer({ 
   isOpen, 
@@ -15,62 +20,59 @@ export default function CartDrawer({
   const [checkoutMsg, setCheckoutMsg] = useState('');
   const navigate = useNavigate();
 
-  // Calcul du sous-total et total
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const total = subtotal;
 
-  // Récupérer le token JWT
   const getToken = () => localStorage.getItem('token');
 
-  // Vérifier si le token est expiré
   const isTokenExpired = (token) => {
     if (!token) return true;
     try {
       const payload = token.split('.')[1];
       const decoded = JSON.parse(atob(payload));
       if (!decoded.exp) return true;
-      const expirationTime = decoded.exp * 1000;
-      return Date.now() >= expirationTime;
+      return Date.now() >= decoded.exp * 1000;
     } catch (error) {
-      console.error('Token validation error:', error);
       return true;
     }
   };
 
-  // Rediriger vers la page de connexion et nettoyer la session
   const redirectToLogin = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     navigate('/signin');
   };
 
-  // ── Checkout : vend chaque article via l'API ─────────────────────────
+  // Wrappers pour déclencher la mise à jour
+  const handleUpdateQuantity = (id, newQuantity) => {
+    updateQuantity(id, newQuantity);
+    triggerCartUpdate();
+  };
+
+  const handleRemoveItem = (id) => {
+    removeItem(id);
+    triggerCartUpdate();
+  };
+
   const handleCheckout = async () => {
     if (cartItems.length === 0) return;
     
     const token = getToken();
     
-    // Vérification du token
     if (!token) {
-      setCheckoutMsg('⚠️ Veuillez vous connecter pour passer commande');
-      setTimeout(() => {
-        redirectToLogin();
-      }, 2000);
+      setCheckoutMsg('⚠️ Please login to checkout');
+      setTimeout(() => redirectToLogin(), 2000);
       return;
     }
     
-    // Vérifier l'expiration du token
     if (isTokenExpired(token)) {
-      setCheckoutMsg('⚠️ Session expirée, veuillez vous reconnecter');
-      setTimeout(() => {
-        redirectToLogin();
-      }, 2000);
+      setCheckoutMsg('⚠️ Session expired, please login again');
+      setTimeout(() => redirectToLogin(), 2000);
       return;
     }
     
     setIsCheckingOut(true);
     setCheckoutMsg('');
-
     const errors = [];
 
     for (const item of cartItems) {
@@ -85,24 +87,20 @@ export default function CartDrawer({
           body: body,
         });
         
-        // Si le serveur retourne 401 Unauthorized (token expiré ou invalide)
         if (res.status === 401) {
-          setCheckoutMsg('⚠️ Session expirée, veuillez vous reconnecter');
-          setTimeout(() => {
-            redirectToLogin();
-          }, 2000);
+          setCheckoutMsg('⚠️ Session expired');
+          setTimeout(() => redirectToLogin(), 2000);
           return;
         }
         
         const data = await res.json();
-
         if (data.error) {
           errors.push(`${item.name} : ${data.error}`);
         } else {
-          console.log('✅ Transaction enregistrée :', data.transaction);
+          console.log('✅ Transaction recorded:', data.transaction);
         }
       } catch (error) {
-        errors.push(`${item.name} : erreur réseau`);
+        errors.push(`${item.name} : network error`);
       }
     }
 
@@ -111,9 +109,10 @@ export default function CartDrawer({
     if (errors.length > 0) {
       setCheckoutMsg('⚠️ ' + errors.join(' | '));
     } else {
-      setCheckoutMsg('✅ Commande confirmée ! Merci pour votre achat.');
+      setCheckoutMsg('✅ Order confirmed! Thank you for your purchase.');
       setTimeout(() => {
         cartItems.forEach(item => removeItem(item.id));
+        triggerCartUpdate();
         setCheckoutMsg('');
       }, 2000);
     }
@@ -125,34 +124,20 @@ export default function CartDrawer({
     <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10 z-50">
       <div className="pointer-events-auto w-screen max-w-md">
         <div className="flex h-full flex-col px-4 py-6 sm:px-6 bg-white shadow-xl">
-          {/* En-tête */}
+          {/* Header */}
           <div className="flex items-center justify-between border-b pb-6 border-gray-100">
             <h2 className="text-lg font-medium text-gray-900">
               Your Cart ({cartItems.reduce((sum, i) => sum + i.quantity, 0)})
             </h2>
-            <div className="ml-3 flex h-7 items-center">
-              <button
-                type="button"
-                onClick={onClose}
-                className="relative -m-2 p-2 text-gray-400 hover:text-gray-500 focus:outline-none"
-              >
-                <span className="absolute -inset-0.5"></span>
-                <span className="sr-only">Close panel</span>
-                <svg className="size-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12"></path>
-                </svg>
-              </button>
-            </div>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
+              ✕
+            </button>
           </div>
 
           {/* Message checkout */}
           {checkoutMsg && (
             <div className={`mt-4 p-3 rounded-lg text-sm font-medium ${
-              checkoutMsg.startsWith('✅') 
-                ? 'bg-green-50 text-green-600' 
-                : checkoutMsg.startsWith('⚠️')
-                ? 'bg-yellow-50 text-yellow-600'
-                : 'bg-red-50 text-red-500'
+              checkoutMsg.startsWith('✅') ? 'bg-green-50 text-green-600' : 'bg-yellow-50 text-yellow-600'
             }`}>
               {checkoutMsg}
             </div>
@@ -160,103 +145,48 @@ export default function CartDrawer({
 
           {/* Liste des articles */}
           <div className="flex-1 overflow-y-auto pt-6">
-            <div className="flow-root">
-              <ul className="divide-y divide-dashed divide-gray-200">
-                {cartItems.map((item) => (
-                  <li key={item.id} className="flex first:pt-0 justify-between last:pb-0 py-5">
-                    <div className="flex">
-                      <div className="mr-4 shrink-0 bg-gray-50 rounded-lg">
-                        <img className="rounded-lg w-21 h-24 object-cover" alt={item.name} src={item.image} />
-                      </div>
-                      <div className="grow space-y-4">
-                        <div>
-                          <h3 className="text-sm text-gray-800 line-clamp-1 font-semibold">{item.name}</h3>
-                          <div className="flex flex-wrap items-center space-x-2">
-                            <p className="text-gray-500 text-sm">{item.color || 'white'}</p>
-                            <span className="text-gray-300">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="4" height="4" viewBox="0 0 4 4" fill="none">
-                                <circle cx="2.33301" cy="2" r="1.5" fill="#D1D5DB"></circle>
-                              </svg>
-                            </span>
-                            <p className="text-gray-500 text-sm">{item.storage || '128 GB'}</p>
-                          </div>
-                        </div>
-                        <div className="flex w-[130px] mt-4 divide-gray-200 divide-x h-10 rounded-lg border border-gray-200 overflow-hidden">
-                          <button
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            className="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                              <path d="M5 9.25C4.59 9.25 4.25 9.59 4.25 10C4.25 10.41 4.59 10.75 5 10.75H15C15.41 10.75 15.75 10.41 15.75 10C15.75 9.59 15.41 9.25 15 9.25H5Z" fill="currentColor"></path>
-                            </svg>
-                          </button>
-                          <div className="flex-1 flex items-center justify-center">{item.quantity}</div>
-                          <button
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="w-10 h-10 flex text-gray-500 items-center justify-center hover:bg-gray-100 transition"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                              <path d="M10 4.25C10.41 4.25 10.75 4.59 10.75 5V9.25H15C15.41 9.25 15.75 9.59 15.75 10C15.75 10.41 15.41 10.75 15 10.75H10.75V15C10.75 15.41 10.41 15.75 10 15.75C9.59 15.75 9.25 15.41 9.25 15V10.75H5C4.59 10.75 4.25 10.41 4.25 10C4.25 9.59 4.59 9.25 5 9.25H9.25V5C9.25 4.59 9.59 4.25 10 4.25Z" fill="currentColor"></path>
-                            </svg>
-                          </button>
-                        </div>
-                      </div>
+            {cartItems.map((item) => (
+              <div key={item.id} className="flex justify-between py-5 border-b border-gray-100">
+                <div className="flex gap-4">
+                  <img className="w-20 h-20 object-cover rounded" src={item.image} alt={item.name} />
+                  <div>
+                    <h3 className="font-medium">{item.name}</h3>
+                    <p className="text-gray-500">${item.price}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <button onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)} className="w-7 h-7 border rounded">-</button>
+                      <span>{item.quantity}</span>
+                      <button onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)} className="w-7 h-7 border rounded">+</button>
                     </div>
-                    <div className="flex flex-col justify-between items-end">
-                      <p className="text-sm text-gray-700 font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
-                      <button
-                        onClick={() => removeItem(item.id)}
-                        className="text-gray-500 cursor-pointer p-1.5 rounded-lg hover:bg-gray-50"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                          <path d="M5.25 5.75V19.75C5.25 20.5784 5.92157 21.25 6.75 21.25H17.25C18.0784 21.25 18.75 20.5784 18.75 19.75V5.75M4 5.75H19.999M5.25 15.8955V9.89551M18.75 15.8955V9.89551M10 16.5V10.5M14 16.5V10.5M15.2495 5.75V4.25C15.2495 3.42157 14.5779 2.75 13.7495 2.75H10.2495C9.42108 2.75 8.74951 3.42157 8.74951 4.25V5.75H15.2495Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
-                        </svg>
-                      </button>
-                    </div>
-                  </li>
-                ))}
-                {cartItems.length === 0 && (
-                  <li className="py-8 text-center text-gray-500">Your cart is empty.</li>
-                )}
-              </ul>
-            </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+                  <button onClick={() => handleRemoveItem(item.id)} className="text-red-500 text-sm mt-2">Remove</button>
+                </div>
+              </div>
+            ))}
+            {cartItems.length === 0 && (
+              <p className="text-center text-gray-500 py-8">Your cart is empty.</p>
+            )}
           </div>
 
-          {/* Pied (total et actions) */}
+          {/* Footer */}
           {cartItems.length > 0 && (
             <div className="border-t border-gray-100 py-6">
-              <div className="flex justify-between text-base">
-                <p className="font-normal text-gray-500">Subtotal</p>
-                <p className="text-gray-500">${subtotal.toFixed(2)}</p>
+              <div className="flex justify-between mb-4">
+                <span>Total</span>
+                <span className="font-bold">${total.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-base font-medium text-gray-900 mt-2">
-                <p>Total</p>
-                <p>${total.toFixed(2)}</p>
-              </div>
-              <div className="mt-6">
-                <button
-                  onClick={onClose}
-                  className="flex w-full items-center h-11 justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  Continue Shopping
-                </button>
-              </div>
-              <div className="mt-2">
-                <button
-                  onClick={handleCheckout}
-                  disabled={isCheckingOut}
-                  className="flex w-full items-center justify-center rounded-lg border border-transparent bg-violet-500 px-6 py-3 text-base font-medium text-white h-11 hover:bg-violet-600 disabled:bg-violet-300 disabled:cursor-not-allowed"
-                >
-                  {isCheckingOut ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Processing...
-                    </>
-                  ) : (
-                    'Process to checkout'
-                  )}
-                </button>
-              </div>
+              <button
+                onClick={handleCheckout}
+                disabled={isCheckingOut}
+                className="w-full bg-violet-500 text-white py-3 rounded-lg hover:bg-violet-600 disabled:bg-violet-300"
+              >
+                {isCheckingOut ? 'Processing...' : 'Checkout'}
+              </button>
+              <button onClick={onClose} className="w-full text-center text-gray-500 mt-3">
+                Continue Shopping
+              </button>
             </div>
           )}
         </div>

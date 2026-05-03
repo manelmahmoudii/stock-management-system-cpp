@@ -1,5 +1,8 @@
 id,type,productId,productName,quantity,oldStock,newStock,amount,date,status,userId,userEmail
 5,SALE,1,iPhone,1,6,5,1500.000000,2026-05-03 12:51:10,COMPLETED,4,manelmahmoudi03@gmail.com
 6,SALE,3,Headphones,1,14,13,100.000000,2026-05-03 13:13:15,COMPLETED,5,meissenmiled@gmail.com
-
 13,DELIVERY,5,cyberesa,10,0,10,220.000000,2026-05-03 13:26:27,COMPLETED,1,admin@example.com
+14,SALE,3,Headphones,2,13,11,200.000000,2026-05-03 14:42:18,COMPLETED,4,manelmahmoudi03@gmail.com
+15,SALE,3,Headphones,1,11,10,100.000000,2026-05-03 14:51:25,COMPLETED,4,manelmahmoudi03@gmail.com
+16,SALE,1,iPhone,1,5,4,1500.000000,2026-05-03 14:51:25,COMPLETED,4,manelmahmoudi03@gmail.com
+17,SALE,2,MacBook,1,10,9,2000.000000,2026-05-03 14:51:25,COMPLETED,4,manelmahmoudi03@gmail.com

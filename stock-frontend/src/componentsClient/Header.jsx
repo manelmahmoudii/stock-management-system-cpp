@@ -1,11 +1,43 @@
 // src/components/Header.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import logo from '/client/imagesClient/logo/logo-icon.svg';
 
-export default function Header() {
-  const [cartCount] = useState(1);
+export default function Header({ onCartClick }) {  // ← Ajout de onCartClick
+  const [cartCount, setCartCount] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Fonction pour mettre à jour le compteur du panier
+  const updateCartCount = () => {
+    const cart = localStorage.getItem('cart');
+    if (cart) {
+      try {
+        const cartItems = JSON.parse(cart);
+        const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+        setCartCount(totalItems);
+      } catch (e) {
+        setCartCount(0);
+      }
+    } else {
+      setCartCount(0);
+    }
+  };
+
+  // Écouter les changements du panier
+  useEffect(() => {
+    updateCartCount();
+
+    // Écouter l'événement personnalisé pour mettre à jour le panier
+    const handleCartUpdate = () => {
+      updateCartCount();
+    };
+
+    window.addEventListener('cartUpdated', handleCartUpdate);
+    
+    return () => {
+      window.removeEventListener('cartUpdated', handleCartUpdate);
+    };
+  }, []);
 
   return (
     <header>
@@ -82,63 +114,20 @@ export default function Header() {
               </div>
             </div>
 
-            {/* Liens desktop (reste identique) */}
+            {/* Liens desktop */}
             <div className="hidden lg:flex items-center">
               <Link className="text-gray-800 hover:text-violet-500 py-7 px-3.5 text-base font-medium transition-colors" to="/client">Home</Link>
               <Link className="text-gray-800 hover:text-violet-500 py-7 px-3.5 text-base font-medium transition-colors" to="/shop">Shop</Link>
 
               <div className="group px-3.5 py-7">
-                <Link className="inline-flex items-center text-gray-800 transition-all cursor-pointer group-hover:text-violet-500 text-base font-medium" to="/shop" data-discover="true">
+                <Link className="inline-flex items-center text-gray-800 transition-all cursor-pointer group-hover:text-violet-500 text-base font-medium" to="/shop">
                   Products
                   <svg className="transition-transform duration-300 group-hover:rotate-180" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <path d="M4.79175 7.39575L10.0001 12.6041L15.2084 7.39575" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </Link>
                 <div className="absolute left-0 right-0 border-t mt-7 w-full py-7 border-gray-100 bg-white z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col xl:flex-row divide-y xl:divide-y-0 xl:divide-x divide-gray-100 gap-7">
-                      <div className="xl:w-2/3 flex divide-x divide-gray-100 pb-7">
-                        <div className="pr-7 w-1/3">
-                          <h3 className="text-gray-800 text-xl mb-3 font-medium">Smart Devices</h3>
-                          <div className="space-y-3">
-                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">T-Shirts</Link>
-                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Hoodies</Link>
-                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Pants &amp; Shorts</Link>
-                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Jackets</Link>
-                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Shoes</Link>
-                          </div>
-                        </div>
-                        <div className="px-7 w-1/3">
-                          <h3 className="text-gray-800 text-xl mb-3 font-medium">Audio &amp; Entertainment</h3>
-                          <div className="space-y-3">
-                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Dresses</Link>
-                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Tops &amp; Blouses</Link>
-                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Skirts &amp; Pants</Link>
-                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Outerwear</Link>
-                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Heels &amp; Flats</Link>
-                          </div>
-                        </div>
-                        <div className="px-7 w-1/3">
-                          <h3 className="text-gray-800 text-xl mb-3 font-medium">Accessories</h3>
-                          <div className="space-y-3">
-                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Dresses</Link>
-                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Tops &amp; Blouses</Link>
-                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Skirts &amp; Pants</Link>
-                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Outerwear</Link>
-                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop" data-discover="true">Heels &amp; Flats</Link>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="xl:w-1/3">
-                        <div className="pl-7 relative">
-                          <img className="rounded-lg w-full" alt="" src="/client/imagesClient/menu-image.jpg" />
-                          <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
-                            <Link className="bg-white py-2.5 px-3.5 rounded-lg hover:bg-gray-100 text-gray-800 border border-gray-300 font-medium text-sm" to="/shop" data-discover="true">Best Seller</Link>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  {/* Menu déroulant - gardez votre contenu existant */}
                 </div>
               </div>
 
@@ -148,7 +137,7 @@ export default function Header() {
               </Link>
             </div>
 
-            {/* Icônes desktop */}
+            {/* Icônes desktop - CHANGEMENT ICI : Link devient button */}
             <div className="lg:flex items-center space-x-5 hidden">
               <div className="flex space-x-3">
                 <button className="text-gray-700 border size-11 rounded-lg border-gray-200 inline-flex items-center justify-center hover:text-gray-900 relative cursor-pointer">
@@ -156,29 +145,44 @@ export default function Header() {
                     <path d="M4.21563 5.3023C2.26145 7.25648 2.26146 10.4248 4.21563 12.379L10.9393 19.1028C11.5251 19.6886 12.4749 19.6886 13.0606 19.1028L19.7844 12.3791C21.7385 10.4249 21.7385 7.25659 19.7844 5.30241C17.8302 3.34823 14.6618 3.34823 12.7076 5.30241L12 6.01001L11.2923 5.3023C9.33816 3.34813 6.16981 3.34813 4.21563 5.3023Z" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
                   </svg>
                 </button>
-                <button className="text-gray-700 border size-11 rounded-lg border-gray-200 inline-flex items-center justify-center hover:text-gray-900 relative cursor-pointer">
+                {/* Icône panier - maintenant un bouton qui ouvre le drawer */}
+                <button 
+                  onClick={onCartClick}
+                  className="text-gray-700 border size-11 rounded-lg border-gray-200 inline-flex items-center justify-center hover:text-gray-900 relative cursor-pointer"
+                >
                   <svg xmlns="http://www.w3.org/2000/svg" width="21" height="18" viewBox="0 0 21 18" fill="none">
                     <path d="M0.75 0.75H1.93055C2.67828 0.75 3.31181 1.30068 3.41594 2.04112L3.56788 3.12161M3.56788 3.12161L4.67 10.9589C4.77412 11.6993 5.40766 12.25 6.15538 12.25L15.5169 12.25C16.1139 12.25 16.6541 11.896 16.8923 11.3486L19.5596 5.22023C19.9908 4.2295 19.2648 3.12161 18.1843 3.12161H3.56788Z" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
                     <path d="M6.2168 16.25H6.2268M14.7539 16.25H14.7639" stroke="#374151" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"></path>
                   </svg>
-                  <span className="rounded-full w-4.5 h-4.5 absolute -top-1 -right-1 bg-violet-500 text-white text-[10px] font-semibold inline-flex items-center justify-center">{cartCount}</span>
+                  {cartCount > 0 && (
+                    <span className="rounded-full w-4.5 h-4.5 absolute -top-1 -right-1 bg-violet-500 text-white text-[10px] font-semibold inline-flex items-center justify-center">
+                      {cartCount > 9 ? '9+' : cartCount}
+                    </span>
+                  )}
                 </button>
               </div>
             </div>
 
-            {/* Icônes mobile */}
+            {/* Icônes mobile - CHANGEMENT ICI aussi */}
             <div className="flex lg:hidden items-center gap-2.5">
               <button className="text-gray-700 border size-10 rounded-lg border-gray-200 inline-flex items-center justify-center hover:text-gray-900 relative cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                   <path d="M4.21563 5.3023C2.26145 7.25648 2.26146 10.4248 4.21563 12.379L10.9393 19.1028C11.5251 19.6886 12.4749 19.6886 13.0606 19.1028L19.7844 12.3791C21.7385 10.4249 21.7385 7.25659 19.7844 5.30241C17.8302 3.34823 14.6618 3.34823 12.7076 5.30241L12 6.01001L11.2923 5.3023C9.33816 3.34813 6.16981 3.34813 4.21563 5.3023Z" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
                 </svg>
               </button>
-              <button className="text-gray-700 border size-10 rounded-lg border-gray-200 inline-flex items-center justify-center hover:text-gray-900 relative cursor-pointer">
+              <button 
+                onClick={onCartClick}
+                className="text-gray-700 border size-10 rounded-lg border-gray-200 inline-flex items-center justify-center hover:text-gray-900 relative cursor-pointer"
+              >
                 <svg xmlns="http://www.w3.org/2000/svg" width="21" height="18" viewBox="0 0 21 18" fill="none">
                   <path d="M0.75 0.75H1.93055C2.67828 0.75 3.31181 1.30068 3.41594 2.04112L3.56788 3.12161M3.56788 3.12161L4.67 10.9589C4.77412 11.6993 5.40766 12.25 6.15538 12.25L15.5169 12.25C16.1139 12.25 16.6541 11.896 16.8923 11.3486L19.5596 5.22023C19.9908 4.2295 19.2648 3.12161 18.1843 3.12161H3.56788Z" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
                   <path d="M6.2168 16.25H6.2268M14.7539 16.25H14.7639" stroke="#374151" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"></path>
                 </svg>
-                <span className="rounded-full w-4 h-4 absolute -top-1 -right-1 bg-violet-500 text-white text-[10px] font-semibold inline-flex items-center justify-center">{cartCount}</span>
+                {cartCount > 0 && (
+                  <span className="rounded-full w-4 h-4 absolute -top-1 -right-1 bg-violet-500 text-white text-[10px] font-semibold inline-flex items-center justify-center">
+                    {cartCount > 9 ? '9+' : cartCount}
+                  </span>
+                )}
               </button>
             </div>
           </div>
