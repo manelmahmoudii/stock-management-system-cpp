@@ -1,11 +1,27 @@
 // src/components/Header.jsx
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import logo from '/client/imagesClient/logo/logo-icon.svg';
 
-export default function Header({ onCartClick }) {  // ← Ajout de onCartClick
+export default function Header({ onCartClick }) {
   const [cartCount, setCartCount] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userEmail, setUserEmail] = useState(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const navigate = useNavigate();
+
+  // Récupérer l'utilisateur connecté
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    if (user) {
+      try {
+        const userData = JSON.parse(user);
+        setUserEmail(userData.email);
+      } catch (e) {
+        setUserEmail(null);
+      }
+    }
+  }, []);
 
   // Fonction pour mettre à jour le compteur du panier
   const updateCartCount = () => {
@@ -23,11 +39,17 @@ export default function Header({ onCartClick }) {  // ← Ajout de onCartClick
     }
   };
 
+  // Fonction de déconnexion
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/signin');
+  };
+
   // Écouter les changements du panier
   useEffect(() => {
     updateCartCount();
 
-    // Écouter l'événement personnalisé pour mettre à jour le panier
     const handleCartUpdate = () => {
       updateCartCount();
     };
@@ -67,13 +89,52 @@ export default function Header({ onCartClick }) {  // ← Ajout de onCartClick
             </div>
           </div>
           <p className="text-gray-900 text-sm font-medium order-1 sm:order-2">Flash Sale Live – 30% Off Everything</p>
+          
+          {/* User section - email connecté avec logout */}
           <div className="hidden sm:block order-3">
-            <Link className="flex gap-2 text-sm items-center font-medium text-gray-900" to="/">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path fillRule="evenodd" clipRule="evenodd" d="M10.3289 3.875C11.6009 3.87514 12.6316 4.90664 12.6316 6.17871C12.6315 7.45067 11.6008 8.48131 10.3289 8.48145C9.05679 8.48145 8.0253 7.45075 8.02516 6.17871C8.02516 4.90655 9.05671 3.875 10.3289 3.875ZM10.3289 9.98145C12.4293 9.98131 14.1315 8.2791 14.1316 6.17871C14.1316 4.07821 12.4293 2.37514 10.3289 2.375C8.22828 2.375 6.52516 4.07812 6.52516 6.17871C6.5253 8.27918 8.22836 9.98145 10.3289 9.98145ZM15.9504 16.7449V17.033C15.9504 17.4472 16.2862 17.783 16.7004 17.783C17.1145 17.7828 17.4504 17.4471 17.4504 17.033V16.7449C17.4504 13.5889 14.8915 11.03 11.7356 11.03H8.9231C5.76714 11.03 3.20825 13.5889 3.20825 16.7449V17.033C3.20825 17.4472 3.54404 17.783 3.95825 17.783C4.37247 17.783 4.70825 17.4472 4.70825 17.033V16.7449C4.70825 14.4174 6.59557 12.53 8.9231 12.53H11.7356C14.0631 12.53 15.9504 14.4174 15.9504 16.7449Z" fill="currentColor"></path>
-              </svg>
-              Sign In / Register
-            </Link>
+            {userEmail ? (
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex gap-2 text-sm items-center font-medium text-gray-900 hover:text-violet-500 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path fillRule="evenodd" clipRule="evenodd" d="M10.3289 3.875C11.6009 3.87514 12.6316 4.90664 12.6316 6.17871C12.6315 7.45067 11.6008 8.48131 10.3289 8.48145C9.05679 8.48145 8.0253 7.45075 8.02516 6.17871C8.02516 4.90655 9.05671 3.875 10.3289 3.875ZM10.3289 9.98145C12.4293 9.98131 14.1315 8.2791 14.1316 6.17871C14.1316 4.07821 12.4293 2.37514 10.3289 2.375C8.22828 2.375 6.52516 4.07812 6.52516 6.17871C6.5253 8.27918 8.22836 9.98145 10.3289 9.98145ZM15.9504 16.7449V17.033C15.9504 17.4472 16.2862 17.783 16.7004 17.783C17.1145 17.7828 17.4504 17.4471 17.4504 17.033V16.7449C17.4504 13.5889 14.8915 11.03 11.7356 11.03H8.9231C5.76714 11.03 3.20825 13.5889 3.20825 16.7449V17.033C3.20825 17.4472 3.54404 17.783 3.95825 17.783C4.37247 17.783 4.70825 17.4472 4.70825 17.033V16.7449C4.70825 14.4174 6.59557 12.53 8.9231 12.53H11.7356C14.0631 12.53 15.9504 14.4174 15.9504 16.7449Z" fill="currentColor"></path>
+                  </svg>
+                  <span>{userEmail.split('@')[0]}</span>
+                  <svg className="transition-transform duration-200" style={{ transform: showUserMenu ? 'rotate(180deg)' : 'rotate(0deg)' }} xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+                
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-[9999] overflow-hidden">
+                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{userEmail}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Connected</p>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                      </svg>
+                      <span className="font-medium">Log Out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link className="flex gap-2 text-sm items-center font-medium text-gray-900" to="/signin">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path fillRule="evenodd" clipRule="evenodd" d="M10.3289 3.875C11.6009 3.87514 12.6316 4.90664 12.6316 6.17871C12.6315 7.45067 11.6008 8.48131 10.3289 8.48145C9.05679 8.48145 8.0253 7.45075 8.02516 6.17871C8.02516 4.90655 9.05671 3.875 10.3289 3.875ZM10.3289 9.98145C12.4293 9.98131 14.1315 8.2791 14.1316 6.17871C14.1316 4.07821 12.4293 2.37514 10.3289 2.375C8.22828 2.375 6.52516 4.07812 6.52516 6.17871C6.5253 8.27918 8.22836 9.98145 10.3289 9.98145ZM15.9504 16.7449V17.033C15.9504 17.4472 16.2862 17.783 16.7004 17.783C17.1145 17.7828 17.4504 17.4471 17.4504 17.033V16.7449C17.4504 13.5889 14.8915 11.03 11.7356 11.03H8.9231C5.76714 11.03 3.20825 13.5889 3.20825 16.7449V17.033C3.20825 17.4472 3.54404 17.783 3.95825 17.783C4.37247 17.783 4.70825 17.4472 4.70825 17.033V16.7449C4.70825 14.4174 6.59557 12.53 8.9231 12.53H11.7356C14.0631 12.53 15.9504 14.4174 15.9504 16.7449Z" fill="currentColor"></path>
+                </svg>
+                Sign In / Register
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -96,9 +157,7 @@ export default function Header({ onCartClick }) {  // ← Ajout de onCartClick
             <div className="flex items-center">
               <Link to="/client" className="flex items-center gap-2.5">
                 <img className="logo-img h-7 w-auto" alt="TechSelf Logo" src={logo} />
-                <span className="text-xl font-bold text-gray-800 hidden sm:inline-block">
-                  TechMarket
-                </span>
+                <span className="text-xl font-bold text-gray-800 hidden sm:inline-block">TechMarket</span>
               </Link>
               <div className="relative ml-6 hidden lg:block">
                 <input
@@ -114,7 +173,7 @@ export default function Header({ onCartClick }) {  // ← Ajout de onCartClick
               </div>
             </div>
 
-            {/* Liens desktop */}
+            {/* Liens desktop avec menu déroulant complet */}
             <div className="hidden lg:flex items-center">
               <Link className="text-gray-800 hover:text-violet-500 py-7 px-3.5 text-base font-medium transition-colors" to="/client">Home</Link>
               <Link className="text-gray-800 hover:text-violet-500 py-7 px-3.5 text-base font-medium transition-colors" to="/shop">Shop</Link>
@@ -127,7 +186,50 @@ export default function Header({ onCartClick }) {  // ← Ajout de onCartClick
                   </svg>
                 </Link>
                 <div className="absolute left-0 right-0 border-t mt-7 w-full py-7 border-gray-100 bg-white z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-                  {/* Menu déroulant - gardez votre contenu existant */}
+                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex flex-col xl:flex-row divide-y xl:divide-y-0 xl:divide-x divide-gray-100 gap-7">
+                      <div className="xl:w-2/3 flex divide-x divide-gray-100 pb-7">
+                        <div className="pr-7 w-1/3">
+                          <h3 className="text-gray-800 text-xl mb-3 font-medium">Smart Devices</h3>
+                          <div className="space-y-3">
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop">T-Shirts</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop">Hoodies</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop">Pants &amp; Shorts</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop">Jackets</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop">Shoes</Link>
+                          </div>
+                        </div>
+                        <div className="px-7 w-1/3">
+                          <h3 className="text-gray-800 text-xl mb-3 font-medium">Audio &amp; Entertainment</h3>
+                          <div className="space-y-3">
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop">Dresses</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop">Tops &amp; Blouses</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop">Skirts &amp; Pants</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop">Outerwear</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop">Heels &amp; Flats</Link>
+                          </div>
+                        </div>
+                        <div className="px-7 w-1/3">
+                          <h3 className="text-gray-800 text-xl mb-3 font-medium">Accessories</h3>
+                          <div className="space-y-3">
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop">Dresses</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop">Tops &amp; Blouses</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop">Skirts &amp; Pants</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop">Outerwear</Link>
+                            <Link className="block text-gray-500 text-base transition-colors hover:text-gray-800" to="/shop">Heels &amp; Flats</Link>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="xl:w-1/3">
+                        <div className="pl-7 relative">
+                          <img className="rounded-lg w-full" alt="Menu" src="/client/imagesClient/menu-image.jpg" />
+                          <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
+                            <Link className="bg-white py-2.5 px-3.5 rounded-lg hover:bg-gray-100 text-gray-800 border border-gray-300 font-medium text-sm" to="/shop">Best Seller</Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -137,7 +239,7 @@ export default function Header({ onCartClick }) {  // ← Ajout de onCartClick
               </Link>
             </div>
 
-            {/* Icônes desktop - CHANGEMENT ICI : Link devient button */}
+            {/* Icônes desktop */}
             <div className="lg:flex items-center space-x-5 hidden">
               <div className="flex space-x-3">
                 <button className="text-gray-700 border size-11 rounded-lg border-gray-200 inline-flex items-center justify-center hover:text-gray-900 relative cursor-pointer">
@@ -145,7 +247,6 @@ export default function Header({ onCartClick }) {  // ← Ajout de onCartClick
                     <path d="M4.21563 5.3023C2.26145 7.25648 2.26146 10.4248 4.21563 12.379L10.9393 19.1028C11.5251 19.6886 12.4749 19.6886 13.0606 19.1028L19.7844 12.3791C21.7385 10.4249 21.7385 7.25659 19.7844 5.30241C17.8302 3.34823 14.6618 3.34823 12.7076 5.30241L12 6.01001L11.2923 5.3023C9.33816 3.34813 6.16981 3.34813 4.21563 5.3023Z" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
                   </svg>
                 </button>
-                {/* Icône panier - maintenant un bouton qui ouvre le drawer */}
                 <button 
                   onClick={onCartClick}
                   className="text-gray-700 border size-11 rounded-lg border-gray-200 inline-flex items-center justify-center hover:text-gray-900 relative cursor-pointer"
@@ -163,7 +264,7 @@ export default function Header({ onCartClick }) {  // ← Ajout de onCartClick
               </div>
             </div>
 
-            {/* Icônes mobile - CHANGEMENT ICI aussi */}
+            {/* Icônes mobile */}
             <div className="flex lg:hidden items-center gap-2.5">
               <button className="text-gray-700 border size-10 rounded-lg border-gray-200 inline-flex items-center justify-center hover:text-gray-900 relative cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
