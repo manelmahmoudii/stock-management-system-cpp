@@ -62,7 +62,7 @@ export default function Header() {
 
             {/* Logo + TechMarket */}
             <div className="flex items-center">
-              <Link to="/" className="flex items-center gap-2.5">
+              <Link to="/client" className="flex items-center gap-2.5">
                 <img className="logo-img h-7 w-auto" alt="TechSelf Logo" src={logo} />
                 <span className="text-xl font-bold text-gray-800 hidden sm:inline-block">
                   TechMarket

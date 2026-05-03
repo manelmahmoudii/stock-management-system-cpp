@@ -317,7 +317,7 @@ const AppSidebar = () => {
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
         }`}
       >
-        <Link to="/" className="flex items-center gap-3">
+        <Link to="/dashboard" className="flex items-center gap-3">
           <img
             src="/images/logo/logo-icon.svg"
             alt="Logo"
