@@ -116,7 +116,7 @@ const AppSidebar = () => {
     {
       icon: <GridIcon />,
       name: "Dashboard",
-      path: "/",
+      path: "/dashboard",
     },
     {
       icon: <BoxCubeIcon />,
