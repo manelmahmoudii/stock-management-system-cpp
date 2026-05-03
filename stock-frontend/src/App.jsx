@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"; // ← Ajoutez Navigate ici
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SignIn from "./pages/AuthPages/SignIn";
@@ -41,9 +41,12 @@ export default function App() {
       <AuthProvider>
         <ScrollToTop />
         <Routes>
+          {/* Redirection de la racine vers signin */}
+          <Route path="/" element={<Navigate to="/signin" replace />} />
+
           {/* Routes Admin (protégées, nécessitent rôle admin) */}
           <Route element={<AppLayout />}>
-            <Route index path="/" element={
+            <Route path="/dashboard" element={
               <ProtectedRoute allowedRoles={['admin']}>
                 <Home />
               </ProtectedRoute>
@@ -158,12 +161,12 @@ export default function App() {
 
           {/* Routes Client (protégées, nécessitent rôle client ou admin) */}
           <Route path="/client" element={
-            <ProtectedRoute allowedRoles={['client']}>
+            <ProtectedRoute allowedRoles={['client', 'admin']}>
               <ClientPage />
             </ProtectedRoute>
           } />
           <Route path="/shop" element={
-            <ProtectedRoute allowedRoles={['client']}>
+            <ProtectedRoute allowedRoles={['client', 'admin']}>
               <ShopPage />
             </ProtectedRoute>
           } />
