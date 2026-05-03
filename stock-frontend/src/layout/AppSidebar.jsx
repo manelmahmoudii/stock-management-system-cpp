@@ -29,6 +29,58 @@ const NotificationBadge = ({ count }) => {
   );
 };
 
+const navItems = [
+{
+  icon: <GridIcon />,
+  name: "Dashboard",
+  path: "/",
+}, 
+
+  {
+    icon: <CalenderIcon />,
+    name: "Calendar",
+    path: "/calendar",
+  },
+  {
+    icon: <UserCircleIcon />,
+    name: "User Profile",
+    path: "/profile",
+  },
+  
+ 
+];
+const othersItems = [
+  {
+    icon: <PieChartIcon />,
+    name: "Charts",
+    subItems: [
+      { name: "Line Chart", path: "/line-chart", pro: false },
+      { name: "Bar Chart", path: "/bar-chart", pro: false },
+    ],
+  },
+  {
+    icon: <BoxCubeIcon />,
+    name: "UI Elements",
+    subItems: [
+      { name: "Alerts", path: "/alerts", pro: false },
+      { name: "Avatar", path: "/avatars", pro: false },
+      { name: "Badge", path: "/badge", pro: false },
+      { name: "Buttons", path: "/buttons", pro: false },
+      { name: "Images", path: "/images", pro: false },
+      { name: "Videos", path: "/videos", pro: false },
+    ],
+  },
+  {
+    icon: <PlugInIcon />,
+    name: "Authentication",
+    subItems: [
+      { name: "Sign In", path: "/signin", pro: false },
+      { name: "Sign Up", path: "/signup", pro: false },
+    ],
+  },
+];
+
+
 const AppSidebar = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
@@ -122,6 +174,11 @@ const AppSidebar = () => {
       path: "/transactionsAdmin",
     },
     {
+  icon: <UserCircleIcon />,
+  name: "Clients",
+  path: "/UserList",
+},
+    {
       icon: <CalenderIcon />,
       name: "Calendar",
       path: "/calendar",
@@ -131,25 +188,9 @@ const AppSidebar = () => {
       name: "User Profile",
       path: "/profile",
     },
-    {
-      name: "Forms",
-      icon: <ListIcon />,
-      subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-    },
-    {
-      name: "Tables",
-      icon: <TableIcon />,
-      subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-    },
-    {
-      name: "Pages",
-      icon: <PageIcon />,
-      subItems: [
-        { name: "Blank Page", path: "/blank", pro: false },
-        { name: "Template", path: "/template", pro: false },
-        { name: "404 Error", path: "/error-404", pro: false },
-      ],
-    },
+    
+    
+    
   ];
 
   const othersItems = [

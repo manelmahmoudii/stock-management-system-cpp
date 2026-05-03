@@ -26,7 +26,12 @@ import DeliveryManagement from "./pages/DeliveryManagement";
 import ProductsAdmin from "./pages/ProductsAdmin";
 import TransactionAdmin from "./pages/TransactionsAdmin";
 import AddProducts from "./pages/AddProducts";
+
 import EditProduct from "./pages/EditProduct";
+
+import UserList from "./pages/AuthPages/UserList"
+
+
 export default function App() {
   return (
     <Router
@@ -59,6 +64,9 @@ export default function App() {
           <Route path="/ProductsAdmin" element={<ProductsAdmin />} />
           <Route path="/transactionsAdmin" element={<TransactionAdmin />} />
           <Route path="/ProductsAdmin/AddProducts" element={<AddProducts />} />
+
+          <Route path="UserList" element={<UserList />} />  {/* ← ajouter */}
+
 
           <Route path="/ProductsAdmin/EditProduct/:id" element={<EditProduct />} />
 <Route path="/delivery" element={<DeliveryManagement />} />

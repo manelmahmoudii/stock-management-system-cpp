@@ -1,33 +1,34 @@
-#pragma once
+#ifndef SHEET_STORAGE_H
+#define SHEET_STORAGE_H
+
 #include <string>
 #include <vector>
 #include <fstream>
 #include <sstream>
 
-// Représente une ligne du fichier CSV comme un vecteur de colonnes
 using Row = std::vector<std::string>;
 
 class SheetStorage {
 public:
-    // Lit toutes les lignes d'un fichier CSV
     static std::vector<Row> readAll(const std::string& filename) {
         std::vector<Row> rows;
         std::ifstream file(filename);
-        
-        if (!file.is_open()) return rows; // fichier inexistant → retourne vide
-        
+        if (!file.is_open()) return rows;
+
         std::string line;
         bool firstLine = true;
-        
+
         while (std::getline(file, line)) {
-            if (firstLine) { firstLine = false; continue; } // skip header
+            if (!line.empty() && line.back() == '\r') line.pop_back();
+            if (firstLine) { firstLine = false; continue; }
             if (line.empty()) continue;
-            
+
             Row row;
             std::stringstream ss(line);
             std::string cell;
-            
+
             while (std::getline(ss, cell, ',')) {
+                if (!cell.empty() && cell.back() == '\r') cell.pop_back();
                 row.push_back(cell);
             }
             rows.push_back(row);
@@ -35,7 +36,6 @@ public:
         return rows;
     }
 
-    // Écrit toutes les lignes dans le fichier CSV (remplace tout)
     static void writeAll(const std::string& filename,
                          const std::string& header,
                          const std::vector<Row>& rows) {
@@ -50,3 +50,5 @@ public:
         }
     }
 };
+
+#endif
