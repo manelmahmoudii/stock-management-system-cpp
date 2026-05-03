@@ -46,7 +46,7 @@ export default function SignUpForm() {
     <div className="flex flex-col flex-1 w-full overflow-y-auto lg:w-1/2 no-scrollbar">
       <div className="w-full max-w-md mx-auto mb-5 sm:pt-10">
         <Link to="/" className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700">
-          <ChevronLeftIcon className="size-5" /> Back to dashboard
+          <ChevronLeftIcon className="size-5" /> Back to Sign In
         </Link>
       </div>
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">

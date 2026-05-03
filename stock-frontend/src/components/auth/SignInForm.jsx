@@ -29,7 +29,7 @@ export default function SignInForm() {
       
       // Redirection selon le rôle
       if (userData?.role === "admin") {
-        navigate("/");
+        navigate("/dashboard");
       } else {
         // Par défaut, redirection vers l'interface client
         navigate("/client");
