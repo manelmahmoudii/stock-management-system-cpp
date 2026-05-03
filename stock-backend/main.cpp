@@ -9,7 +9,8 @@ int main() {
 
     httplib::Server svr;
 
-    // ─── CORS : OPTIONS preflight pour toutes les routes ───
+
+    // EYA
 // ✅ CORS GLOBAL (AVANT toutes les routes)
 svr.set_pre_routing_handler([](const httplib::Request& req, httplib::Response& res) {
 
@@ -37,6 +38,9 @@ svr.set_pre_routing_handler([](const httplib::Request& req, httplib::Response& r
 
     return httplib::Server::HandlerResponse::Unhandled;
 });
+
+
+// c bon eya
     // ──────────── ROUTES PRODUITS ────────────
     svr.Get("/api/products", [](const httplib::Request&, httplib::Response& res) {
         res.set_content(ProductHandler::getAll(), "application/json");
@@ -63,7 +67,7 @@ svr.set_pre_routing_handler([](const httplib::Request& req, httplib::Response& r
         res.set_content(ProductHandler::sell(id, req.body), "application/json");
     });
 
-    // ──────────── ROUTES UTILISATEURS ────────────
+    // EYAA 
 svr.Post("/api/register", [](const httplib::Request& req, httplib::Response& res) {
     auto [body, status] = UserHandler::registerUser(req.body);
     res.status = status;
@@ -90,6 +94,8 @@ svr.Post("/api/login", [](const httplib::Request& req, httplib::Response& res) {
         res.status = status;
         res.set_content(body, "application/json");
     });
+
+    /// cbon eya 
 
     svr.Get("/", [](const httplib::Request&, httplib::Response& res) {
         res.set_content("Backend running", "text/plain");
