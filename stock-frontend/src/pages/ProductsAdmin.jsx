@@ -148,16 +148,16 @@ export default function ProductList() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-violet-500" />
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-500" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center text-red-500 py-10">
+      <div className="text-center text-red-500 dark:text-red-400 py-10">
         <p>{error}</p>
-        <p className="text-sm text-gray-400 mt-1">
+        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
           Vérifiez que le backend tourne sur localhost:8081
         </p>
       </div>
@@ -165,17 +165,17 @@ export default function ProductList() {
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
       {/* Header */}
       <div className="flex flex-col justify-between gap-5 border-b border-gray-200 px-5 py-4 sm:flex-row sm:items-center dark:border-gray-800">
         <div>
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Products List</h3>
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Products List</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">Track your store's progress to boost your sales.</p>
         </div>
         <div className="flex gap-3">
           <button
             onClick={exportCSV}
-            className="inline-flex items-center justify-center gap-2 rounded-lg transition px-5 py-3.5 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300"
+            className="inline-flex items-center justify-center gap-2 rounded-lg transition px-5 py-3.5 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-gray-700"
           >
             Export
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -211,7 +211,7 @@ export default function ProductList() {
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              className="shadow-sm focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-11 pr-4 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-none sm:w-[300px] sm:min-w-[300px] dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+              className="shadow-sm focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-white dark:bg-gray-800 py-2.5 pl-11 pr-4 text-sm text-gray-800 dark:text-white placeholder:text-gray-400 focus:ring-3 focus:outline-none sm:w-[300px] sm:min-w-[300px] dark:border-gray-700"
             />
           </div>
         </div>
@@ -221,7 +221,7 @@ export default function ProductList() {
       <div className="overflow-x-auto custom-scrollbar">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-200 dark:divide-gray-800 dark:border-gray-800">
+            <tr className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
               <th className="lg:w-14 px-5 py-4 text-left whitespace-nowrap">
                 <label className="cursor-pointer text-sm font-medium text-gray-700 select-none dark:text-gray-400">
                   <input type="checkbox" className="sr-only" checked={selectedRows.length === paginatedProducts.length && paginatedProducts.length > 0} onChange={toggleSelectAll} />
@@ -261,7 +261,7 @@ export default function ProductList() {
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
             {paginatedProducts.map((product) => (
-              <tr key={product.id} className="transition hover:bg-gray-50 dark:hover:bg-gray-900">
+              <tr key={product.id} className="transition hover:bg-gray-50 dark:hover:bg-gray-800/50">
                 <td className="lg:w-14 px-5 py-4 whitespace-nowrap">
                   <label className="cursor-pointer text-sm font-medium text-gray-700 select-none dark:text-gray-400">
                     <input type="checkbox" className="sr-only" checked={selectedRows.includes(product.id)} onChange={() => toggleSelectRow(product.id)} />
@@ -276,17 +276,21 @@ export default function ProductList() {
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 bg-gray-100 rounded-md flex items-center justify-center">
-                      <span className="text-xs text-gray-400">Image</span>
+                    <div className="h-12 w-12 bg-gray-100 dark:bg-gray-800 rounded-md flex items-center justify-center overflow-hidden">
+                      {product.image ? (
+                        <img className="h-12 w-12 object-cover" alt={product.name} src={product.image} />
+                      ) : (
+                        <span className="text-xs text-gray-400 dark:text-gray-500">No img</span>
+                      )}
                     </div>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-400">{product.name}</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{product.name}</span>
                   </div>
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   <p className="text-sm text-gray-500 dark:text-gray-400">{product.category}</p>
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  <p className="text-sm text-gray-700 dark:text-gray-400">${product.price.toFixed(2)}</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">${product.price.toFixed(2)}</p>
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   <span className={getStockBadge(product.quantity, product.minThreshold)}>
@@ -294,7 +298,7 @@ export default function ProductList() {
                   </span>
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  <p className="text-sm text-gray-700 dark:text-gray-400">{product.minThreshold}</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">{product.minThreshold}</p>
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   <div className="relative inline-block">
@@ -304,18 +308,18 @@ export default function ProductList() {
                       </svg>
                     </button>
                     {openMenuId === product.id && (
-                      <div className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-2xl border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+                      <div className="absolute right-0 z-10 mt-2 w-44 origin-top-right rounded-2xl border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-800 dark:bg-gray-900">
                         <div className="space-y-1">
                           <Link 
                             to={`/ProductsAdmin/EditProduct/${product.id}`} 
-                            className="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5"
+                            className="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
                           >
                             Edit
                           </Link>
                           <button 
                             onClick={() => handleDelete(product.id)} 
                             disabled={deletingId === product.id}
-                            className="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-red-500 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-50"
+                            className="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-red-500 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
                           >
                             {deletingId === product.id ? 'Deleting...' : 'Delete'}
                           </button>
@@ -328,7 +332,7 @@ export default function ProductList() {
             ))}
             {paginatedProducts.length === 0 && (
               <tr>
-                <td colSpan="7" className="p-6 text-center text-gray-500">
+                <td colSpan="7" className="p-6 text-center text-gray-500 dark:text-gray-400">
                   No products found
                 </td>
               </tr>
@@ -341,16 +345,16 @@ export default function ProductList() {
       <div className="flex flex-col sm:flex-row justify-between border-t border-gray-200 px-5 py-4 dark:border-gray-800">
         <div className="pb-3 sm:pb-0">
           <span className="block text-sm font-medium text-gray-500 dark:text-gray-400">
-            Showing <span className="text-gray-800 dark:text-white/90">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to{" "}
-            <span className="text-gray-800 dark:text-white/90">{Math.min(currentPage * ITEMS_PER_PAGE, sortedProducts.length)}</span>{" "}
-            of <span className="text-gray-800 dark:text-white/90">{sortedProducts.length}</span>
+            Showing <span className="text-gray-800 dark:text-white">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to{" "}
+            <span className="text-gray-800 dark:text-white">{Math.min(currentPage * ITEMS_PER_PAGE, sortedProducts.length)}</span>{" "}
+            of <span className="text-gray-800 dark:text-white">{sortedProducts.length}</span>
           </span>
         </div>
         <div className="flex w-full items-center justify-between gap-2 rounded-lg bg-gray-50 p-4 sm:w-auto sm:justify-normal sm:rounded-none sm:bg-transparent sm:p-0 dark:bg-gray-900 dark:sm:bg-transparent">
           <button
             disabled={currentPage === 1}
             onClick={() => setCurrentPage((p) => p - 1)}
-            className="shadow-sm flex items-center gap-2 rounded-lg border border-gray-300 bg-white p-2 text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 sm:p-2.5 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/5"
+            className="shadow-sm flex items-center gap-2 rounded-lg border border-gray-300 bg-white p-2 text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 sm:p-2.5 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
           >
             Previous
           </button>
@@ -376,7 +380,7 @@ export default function ProductList() {
           <button
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage((p) => p + 1)}
-            className="shadow-sm flex items-center gap-2 rounded-lg border border-gray-300 bg-white p-2 text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 sm:p-2.5 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/5"
+            className="shadow-sm flex items-center gap-2 rounded-lg border border-gray-300 bg-white p-2 text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 sm:p-2.5 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
           >
             Next
           </button>

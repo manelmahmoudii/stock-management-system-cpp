@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <vector>  // AJOUTÉ - nécessaire pour std::vector
+#include <vector>
 
 class Product {
 public:
@@ -10,16 +10,15 @@ public:
     double price;
     int quantity;
     int minThreshold;
+    std::string image;  // NOUVEAU : chemin de l'image
 
-    // Constructeurs
     Product() : id(0), price(0), quantity(0), minThreshold(5) {}
 
     Product(int id, const std::string& name, const std::string& category,
-            double price, int quantity, int minThreshold = 5)
+            double price, int quantity, int minThreshold = 5, const std::string& image = "")
         : id(id), name(name), category(category),
-          price(price), quantity(quantity), minThreshold(minThreshold) {}
+          price(price), quantity(quantity), minThreshold(minThreshold), image(image) {}
 
-    // Convertit le produit en ligne CSV
     std::vector<std::string> toRow() const {
         return {
             std::to_string(id),
@@ -27,14 +26,14 @@ public:
             category,
             std::to_string(price),
             std::to_string(quantity),
-            std::to_string(minThreshold)
+            std::to_string(minThreshold),
+            image  // NOUVEAU
         };
     }
 
-    // Crée un produit depuis une ligne CSV
     static Product fromRow(const std::vector<std::string>& row) {
-        if (row.size() < 6) {
-            return Product();  // Retourne un produit vide si ligne invalide
+        if (row.size() < 7) {
+            return Product();
         }
         return Product(
             std::stoi(row[0]),
@@ -42,11 +41,11 @@ public:
             row[2],
             std::stod(row[3]),
             std::stoi(row[4]),
-            std::stoi(row[5])
+            std::stoi(row[5]),
+            row.size() > 6 ? row[6] : ""  // Image (optionnel)
         );
     }
 
-    // Convertit en JSON string pour l'API
     std::string toJson() const {
         return "{"
             "\"id\":" + std::to_string(id) + ","
@@ -54,7 +53,8 @@ public:
             "\"category\":\"" + category + "\","
             "\"price\":" + std::to_string(price) + ","
             "\"quantity\":" + std::to_string(quantity) + ","
-            "\"minThreshold\":" + std::to_string(minThreshold) +
+            "\"minThreshold\":" + std::to_string(minThreshold) + ","
+            "\"image\":\"" + image + "\""
         "}";
     }
 };

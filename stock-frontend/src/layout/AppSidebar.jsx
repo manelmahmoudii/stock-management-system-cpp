@@ -125,7 +125,7 @@ const AppSidebar = () => {
     },
     {
       icon: <Truck size={20} />,
-      name: "Livraisons",
+      name: "Delivery",
       path: "/delivery",
       badge: needsRestockCount,
     },

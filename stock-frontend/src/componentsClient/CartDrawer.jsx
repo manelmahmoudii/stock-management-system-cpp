@@ -182,7 +182,7 @@ export default function CartDrawer({
                 disabled={isCheckingOut}
                 className="w-full bg-violet-500 text-white py-3 rounded-lg hover:bg-violet-600 disabled:bg-violet-300"
               >
-                {isCheckingOut ? 'Processing...' : 'Checkout'}
+                {isCheckingOut ? 'Processing...' : 'Order'}
               </button>
               <button onClick={onClose} className="w-full text-center text-gray-500 mt-3">
                 Continue Shopping

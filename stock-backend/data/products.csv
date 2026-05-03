@@ -1,7 +1,6 @@
-id,name,category,price,quantity,minThreshold
-1,iPhone,Phone,1500.000000,4,3
-2,MacBook,Laptop,2000.000000,9,2
-3,Headphones,Audio,100.000000,10,5
-4,Samsung,Phone,900.000000,10,3
-5,cyberesa,Phone,22.000000,10,5
-6,MacBookkkk,Laptop,2000.000000,99,5
+id,name,category,price,quantity,minThreshold,image
+5,montre,Accessories,100.000000,0,5,/client/imagesClient/products/image-6.png
+6,Iphone+15,Phone,1000.000000,200,5,/client/imagesClient/products/image-5.png
+7,baffle,Audio,1000.000000,3,5,/client/imagesClient/products/image-8.png
+8,clavier,Accessories,1933.000000,22,5,/client/imagesClient/products/image-7.png
+9,PC+MSI,Laptop,2000.000000,22,5,/client/imagesClient/products/image-4.png

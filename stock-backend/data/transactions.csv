@@ -6,3 +6,6 @@ id,type,productId,productName,quantity,oldStock,newStock,amount,date,status,user
 15,SALE,3,Headphones,1,11,10,100.000000,2026-05-03 14:51:25,COMPLETED,4,manelmahmoudi03@gmail.com
 16,SALE,1,iPhone,1,5,4,1500.000000,2026-05-03 14:51:25,COMPLETED,4,manelmahmoudi03@gmail.com
 17,SALE,2,MacBook,1,10,9,2000.000000,2026-05-03 14:51:25,COMPLETED,4,manelmahmoudi03@gmail.com
+18,SALE,7,clavier,1,10,9,100.000000,2026-05-03 15:13:28,COMPLETED,4,manelmahmoudi03@gmail.com
+19,SALE,5,montre,1,199,198,100.000000,2026-05-03 16:04:07,COMPLETED,4,manelmahmoudi03@gmail.com
+20,SALE,5,montre,1,198,197,100.000000,2026-05-03 16:05:19,COMPLETED,4,manelmahmoudi03@gmail.com
