@@ -69,26 +69,39 @@ export function useProducts() {
   };
 
   // Vente d'un produit
-  const sellProduct = async (productId, quantity) => {
-    const body = new URLSearchParams({ quantity }).toString();
-    const res  = await fetch(`${API}/products/${productId}/sell`, {
-      method: 'POST',
-      body,
-    });
-    const data = await res.json();
-
-    if (data.error) throw new Error(data.error);
-
-    setProducts(prev =>
-      prev.map(p =>
-        p.id === productId
-          ? { ...p, quantity: data.product.quantity }
-          : p
-      )
-    );
-
-    return data;
+  // src/hooks/useProducts.js
+const sellProduct = async (productId, quantity) => {
+  const token = localStorage.getItem('token'); // Récupérer le token
+  
+  const body = new URLSearchParams({ quantity }).toString();
+  const headers = {
+    'Content-Type': 'application/x-www-form-urlencoded',
   };
+  
+  // Ajouter le token si présent
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  const res = await fetch(`${API}/products/${productId}/sell`, {
+    method: 'POST',
+    headers: headers,
+    body: body,
+  });
+  
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  
+  setProducts(prev =>
+    prev.map(p =>
+      p.id === productId
+        ? { ...p, quantity: data.product.quantity }
+        : p
+    )
+  );
+  
+  return data;
+};
 // Ajoutez cette fonction dans votre hook
 const deliverProduct = async (productId, quantity) => {
   const body = new URLSearchParams({ quantity }).toString();

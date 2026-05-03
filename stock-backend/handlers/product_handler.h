@@ -6,6 +6,9 @@
 #include <sstream>
 #include <map>
 #include "transaction_handler.h"
+#include "../utils/jwt.h"      // ← AJOUTEZ CETTE LIGNE
+#include "../utils/hash.h"  
+#include "../config/constants.h"  // ← AJOUTEZ CETTE LIGNE
 
 const std::string PRODUCTS_FILE = "data/products.csv";
 const std::string PRODUCTS_HEADER = "id,name,category,price,quantity,minThreshold";
@@ -125,45 +128,62 @@ public:
         SheetStorage::writeAll(PRODUCTS_FILE, PRODUCTS_HEADER, newRows);
         return "{\"success\":true}";
     }
-
-    static std::string sell(int id, const std::string& body) {
-        auto params = parseBody(body);
-        int qty = std::stoi(params["quantity"]);
-
-        auto rows = SheetStorage::readAll(PRODUCTS_FILE);
-
-        for (auto& row : rows) {
-            if (!row.empty() && std::stoi(row[0]) == id) {
-                Product p = Product::fromRow(row);
-                int oldStock = p.quantity;
-
-                if (p.quantity < qty) {
-                    TransactionHandler::logTransaction("SALE", id, p.name, qty, oldStock, oldStock, 
-                                                        p.price * qty, "FAILED");
-                    return "{\"error\":\"Stock insuffisant\"}";
-                }
-
-                p.quantity -= qty;
-                row = p.toRow();
-                SheetStorage::writeAll(PRODUCTS_FILE, PRODUCTS_HEADER, rows);
-
-                TransactionHandler::logTransaction("SALE", id, p.name, qty, oldStock, p.quantity,
-                                                    p.price * qty, "COMPLETED");
-
-                return "{"
-                    "\"product\":" + p.toJson() + ","
-                    "\"transaction\":{"
-                        "\"type\":\"SALE\","
-                        "\"productId\":" + std::to_string(id) + ","
-                        "\"quantity\":" + std::to_string(qty) + ","
-                        "\"productName\":\"" + p.name + "\","
-                        "\"amount\":" + std::to_string(p.price * qty) +
-                    "}"
-                "}";
-            }
-        }
-        return "{\"error\":\"Product not found\"}";
+// Ajoutez une fonction utilitaire pour extraire l'utilisateur du token
+static std::pair<int, std::string> getUserFromRequest(const httplib::Request& req) {
+    std::string authHeader = req.get_header_value("Authorization");
+    if (authHeader.empty() || authHeader.find("Bearer ") != 0) {
+        return {0, ""};
     }
+    std::string token = authHeader.substr(7);
+    auto payload = jwt::verify(token, JWT_SECRET);
+    
+    int userId = payload.count("id") ? std::stoi(payload["id"]) : 0;
+    std::string userEmail = payload.count("email") ? payload["email"] : "";
+    
+    return {userId, userEmail};
+}
+    // Modifiez la méthode sell
+static std::string sell(int id, const std::string& body, const httplib::Request& req) {
+    auto params = parseBody(body);
+    int qty = std::stoi(params["quantity"]);
+
+    // Récupérer l'utilisateur
+    auto [userId, userEmail] = getUserFromRequest(req);
+
+    auto rows = SheetStorage::readAll(PRODUCTS_FILE);
+
+    for (auto& row : rows) {
+        if (!row.empty() && std::stoi(row[0]) == id) {
+            Product p = Product::fromRow(row);
+            int oldStock = p.quantity;
+
+            if (p.quantity < qty) {
+                TransactionHandler::logTransaction("SALE", id, p.name, qty, oldStock, oldStock, 
+                                                    p.price * qty, "FAILED", userId, userEmail);
+                return "{\"error\":\"Stock insuffisant\"}";
+            }
+
+            p.quantity -= qty;
+            row = p.toRow();
+            SheetStorage::writeAll(PRODUCTS_FILE, PRODUCTS_HEADER, rows);
+
+            TransactionHandler::logTransaction("SALE", id, p.name, qty, oldStock, p.quantity,
+                                                p.price * qty, "COMPLETED", userId, userEmail);
+
+            return "{"
+                "\"product\":" + p.toJson() + ","
+                "\"transaction\":{"
+                    "\"type\":\"SALE\","
+                    "\"productId\":" + std::to_string(id) + ","
+                    "\"quantity\":" + std::to_string(qty) + ","
+                    "\"productName\":\"" + p.name + "\","
+                    "\"amount\":" + std::to_string(p.price * qty) +
+                "}"
+            "}";
+        }
+    }
+    return "{\"error\":\"Product not found\"}";
+}
 
     // product_handler.h - À l'intérieur de la classe ProductHandler
 

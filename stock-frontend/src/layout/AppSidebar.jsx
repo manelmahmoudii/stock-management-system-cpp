@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { ArrowLeftRight, Truck } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ArrowLeftRight, Truck, LogOut } from "lucide-react";
 import { useProducts } from "../hooks/useProducts";
 // Assume these icons are imported from an icon library
 import {
@@ -29,63 +29,16 @@ const NotificationBadge = ({ count }) => {
   );
 };
 
-const navItems = [
-{
-  icon: <GridIcon />,
-  name: "Dashboard",
-  path: "/",
-}, 
-
-  {
-    icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/calendar",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/profile",
-  },
-  
- 
-];
-const othersItems = [
-  {
-    icon: <PieChartIcon />,
-    name: "Charts",
-    subItems: [
-      { name: "Line Chart", path: "/line-chart", pro: false },
-      { name: "Bar Chart", path: "/bar-chart", pro: false },
-    ],
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "UI Elements",
-    subItems: [
-      { name: "Alerts", path: "/alerts", pro: false },
-      { name: "Avatar", path: "/avatars", pro: false },
-      { name: "Badge", path: "/badge", pro: false },
-      { name: "Buttons", path: "/buttons", pro: false },
-      { name: "Images", path: "/images", pro: false },
-      { name: "Videos", path: "/videos", pro: false },
-    ],
-  },
-  {
-    icon: <PlugInIcon />,
-    name: "Authentication",
-    subItems: [
-      { name: "Sign In", path: "/signin", pro: false },
-      { name: "Sign Up", path: "/signup", pro: false },
-    ],
-  },
-];
-
-
 const AppSidebar = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
+  const navigate = useNavigate();
   const { products, loading } = useProducts();
   const [needsRestockCount, setNeedsRestockCount] = useState(0);
+
+  // Récupérer les infos utilisateur
+  const userRole = localStorage.getItem('userRole');
+  const userEmail = localStorage.getItem('userEmail');
 
   // Calculer le nombre de produits à réapprovisionner
   useEffect(() => {
@@ -103,6 +56,14 @@ const AppSidebar = () => {
     (path) => location.pathname === path,
     [location.pathname]
   );
+
+  // Fonction de déconnexion
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userEmail');
+    navigate('/signin');
+  };
 
   useEffect(() => {
     let submenuMatched = false;
@@ -174,23 +135,15 @@ const AppSidebar = () => {
       path: "/transactionsAdmin",
     },
     {
-  icon: <UserCircleIcon />,
-  name: "Clients",
-  path: "/UserList",
-},
+      icon: <UserCircleIcon />,
+      name: "Clients",
+      path: "/UserList",
+    },
     {
       icon: <CalenderIcon />,
       name: "Calendar",
       path: "/calendar",
     },
-    {
-      icon: <UserCircleIcon />,
-      name: "User Profile",
-      path: "/profile",
-    },
-    
-    
-    
   ];
 
   const othersItems = [
@@ -212,14 +165,6 @@ const AppSidebar = () => {
         { name: "Buttons", path: "/buttons", pro: false },
         { name: "Images", path: "/images", pro: false },
         { name: "Videos", path: "/videos", pro: false },
-      ],
-    },
-    {
-      icon: <PlugInIcon />,
-      name: "Authentication",
-      subItems: [
-        { name: "Sign In", path: "/signin", pro: false },
-        { name: "Sign Up", path: "/signup", pro: false },
       ],
     },
   ];
@@ -373,21 +318,19 @@ const AppSidebar = () => {
         }`}
       >
         <Link to="/" className="flex items-center gap-3">
-          {/* Logo */}
           <img
             src="/images/logo/logo-icon.svg"
             alt="Logo"
             className="w-8 h-8"
           />
-          
-          {/* Nom TechMarket - visible seulement quand la sidebar est expansée */}
-         {(isExpanded || isHovered || isMobileOpen) && (
-  <span className="text-xl font-bold text-gray-700 dark:text-gray-100">
-    TechMarket
-  </span>
-)}
+          {(isExpanded || isHovered || isMobileOpen) && (
+            <span className="text-xl font-bold text-gray-700 dark:text-gray-100">
+              TechMarket
+            </span>
+          )}
         </Link>
       </div>
+      
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
@@ -425,6 +368,34 @@ const AppSidebar = () => {
             </div>
           </div>
         </nav>
+        
+        {/* Section de déconnexion */}
+        <div className="mt-auto pt-4 pb-6 border-t border-gray-200 dark:border-gray-800">
+          {/* Info utilisateur (optionnel) */}
+          {(isExpanded || isHovered || isMobileOpen) && userEmail && (
+            <div className="px-3 py-2 mb-3">
+              <p className="text-xs text-gray-500 dark:text-gray-400">Connecté en tant que</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{userEmail}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 capitalize mt-1">Rôle: {userRole || 'client'}</p>
+            </div>
+          )}
+          
+          {/* Bouton Logout */}
+          <button
+            onClick={handleLogout}
+            className={`menu-item group menu-item-inactive w-full ${
+              !isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"
+            }`}
+          >
+            <span className="menu-item-icon-size">
+              <LogOut size={20} />
+            </span>
+            {(isExpanded || isHovered || isMobileOpen) && (
+              <span className="menu-item-text">Sign Out</span>
+            )}
+          </button>
+        </div>
+        
         {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
       </div>
     </aside>

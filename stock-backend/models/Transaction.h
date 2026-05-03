@@ -5,7 +5,7 @@
 class Transaction {
 public:
     int id;
-    std::string type;        // "SALE" ou "DELIVERY"
+    std::string type;
     int productId;
     std::string productName;
     int quantity;
@@ -13,14 +13,18 @@ public:
     int newStock;
     double amount;
     std::string date;
-    std::string status;      // "COMPLETED", "FAILED"
+    std::string status;
+    int userId;
+    std::string userEmail;
 
-    Transaction() : id(0), productId(0), quantity(0), oldStock(0), newStock(0), amount(0) {}
+    Transaction() : id(0), productId(0), quantity(0), oldStock(0), newStock(0), amount(0), userId(0) {}
 
     Transaction(int id, const std::string& type, int productId, const std::string& productName,
-                int quantity, int oldStock, int newStock, double amount, const std::string& date, const std::string& status)
+                int quantity, int oldStock, int newStock, double amount, const std::string& date, 
+                const std::string& status, int userId, const std::string& userEmail)
         : id(id), type(type), productId(productId), productName(productName),
-          quantity(quantity), oldStock(oldStock), newStock(newStock), amount(amount), date(date), status(status) {}
+          quantity(quantity), oldStock(oldStock), newStock(newStock), amount(amount), 
+          date(date), status(status), userId(userId), userEmail(userEmail) {}
 
     std::vector<std::string> toRow() const {
         return {
@@ -33,23 +37,38 @@ public:
             std::to_string(newStock),
             std::to_string(amount),
             date,
-            status
+            status,
+            std::to_string(userId),
+            userEmail
         };
     }
 
     static Transaction fromRow(const std::vector<std::string>& row) {
         Transaction t;
-        if (row.size() >= 10) {
-            t.id = std::stoi(row[0]);
-            t.type = row[1];
-            t.productId = std::stoi(row[2]);
-            t.productName = row[3];
-            t.quantity = std::stoi(row[4]);
-            t.oldStock = std::stoi(row[5]);
-            t.newStock = std::stoi(row[6]);
-            t.amount = std::stod(row[7]);
-            t.date = row[8];
-            t.status = row[9];
+        
+        // Vérifier que la ligne est valide et a au moins 12 colonnes
+        if (row.size() >= 12 && !row[0].empty() && row[0] != "id") {
+            try {
+                int id = std::stoi(row[0]);
+                // Ignorer les ID 0 (invalides)
+                if (id == 0) return t;
+                
+                t.id = id;
+                t.type = row[1];
+                t.productId = std::stoi(row[2]);
+                t.productName = row[3];
+                t.quantity = std::stoi(row[4]);
+                t.oldStock = std::stoi(row[5]);
+                t.newStock = std::stoi(row[6]);
+                t.amount = std::stod(row[7]);
+                t.date = row[8];
+                t.status = row[9];
+                t.userId = std::stoi(row[10]);
+                t.userEmail = row.size() > 11 ? row[11] : "";
+            } catch (const std::exception& e) {
+                // En cas d'erreur, retourner une transaction vide
+                return Transaction();
+            }
         }
         return t;
     }
@@ -65,7 +84,9 @@ public:
         json += "\"newStock\":" + std::to_string(newStock) + ",";
         json += "\"amount\":" + std::to_string(amount) + ",";
         json += "\"date\":\"" + date + "\",";
-        json += "\"status\":\"" + status + "\"";
+        json += "\"status\":\"" + status + "\",";
+        json += "\"userId\":" + std::to_string(userId) + ",";
+        json += "\"userEmail\":\"" + userEmail + "\"";
         json += "}";
         return json;
     }

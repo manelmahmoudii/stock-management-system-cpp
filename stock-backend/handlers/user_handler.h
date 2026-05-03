@@ -11,10 +11,10 @@
 #include <algorithm>
 #include <iostream>
 #include <ctime>
+#include "../config/constants.h"  // ← AJOUTEZ CETTE LIGNE
 
 const std::string USERS_FILE = "data/users.csv";
 const std::string USERS_HEADER = "id,firstName,lastName,email,password,role";
-const std::string JWT_SECRET = "mon-super-secret-jwt-2024";
 
 class UserHandler {
 private:

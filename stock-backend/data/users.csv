@@ -3,3 +3,4 @@ id,firstName,lastName,email,password,role
 2,Zayati,Aya,aa@gmail.com,a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3,client
 3,Zayati,Aya,zayatiayazayati@gmail.com,a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3,client
 4,Manel,Mahmoudi,manelmahmoudi03@gmail.com,d3d3a1359889db1d004217febc73429acfe01705cd1423d4e93b81bea26473ab,client
+5,Meissen,Miled,meissenmiled@gmail.com,d3d3a1359889db1d004217febc73429acfe01705cd1423d4e93b81bea26473ab,client

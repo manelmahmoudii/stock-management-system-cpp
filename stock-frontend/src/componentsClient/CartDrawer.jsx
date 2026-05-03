@@ -18,9 +18,23 @@ export default function CartDrawer({
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const total = subtotal;
 
+  // Récupérer le token JWT
+  const getToken = () => localStorage.getItem('token');
+
   // ── Checkout : vend chaque article via l'API ─────────────────────────
   const handleCheckout = async () => {
     if (cartItems.length === 0) return;
+    
+    const token = getToken();
+    if (!token) {
+      setCheckoutMsg('⚠️ Veuillez vous connecter pour passer commande');
+      // Option: rediriger vers la page de connexion après 2 secondes
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 2000);
+      return;
+    }
+    
     setIsCheckingOut(true);
     setCheckoutMsg('');
 
@@ -33,6 +47,7 @@ export default function CartDrawer({
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': `Bearer ${token}`,  // ← Ajout du token
           },
           body: body,
         });
@@ -94,6 +109,8 @@ export default function CartDrawer({
             <div className={`mt-4 p-3 rounded-lg text-sm font-medium ${
               checkoutMsg.startsWith('✅') 
                 ? 'bg-green-50 text-green-600' 
+                : checkoutMsg.startsWith('⚠️')
+                ? 'bg-yellow-50 text-yellow-600'
                 : 'bg-red-50 text-red-500'
             }`}>
               {checkoutMsg}

@@ -56,10 +56,19 @@ int main() {
         res.set_content(ProductHandler::remove(id), "application/json");
     });
 
-    svr.Post("/api/products/:id/sell", [](const httplib::Request& req, httplib::Response& res) {
-        int id = std::stoi(req.path_params.at("id"));
-        res.set_content(ProductHandler::sell(id, req.body), "application/json");
-    });
+   svr.Post("/api/products/:id/sell", [](const httplib::Request& req, httplib::Response& res) {
+    int id = std::stoi(req.path_params.at("id"));
+    
+    // Debug: Afficher les headers
+    std::cout << "=== SELL REQUEST ===" << std::endl;
+    std::cout << "Product ID: " << id << std::endl;
+    std::cout << "Body: " << req.body << std::endl;
+    
+    auto authHeader = req.get_header_value("Authorization");
+    std::cout << "Authorization header: " << (authHeader.empty() ? "MISSING" : authHeader) << std::endl;
+    
+    res.set_content(ProductHandler::sell(id, req.body, req), "application/json");
+});
 
     svr.Post("/api/products/:id/deliver", [](const httplib::Request& req, httplib::Response& res) {
         int id = std::stoi(req.path_params.at("id"));
@@ -67,10 +76,11 @@ int main() {
     });
 
     // ──────────── ROUTES TRANSACTIONS ────────────
-    svr.Get("/api/transactions", [](const httplib::Request&, httplib::Response& res) {
-        std::string json = TransactionHandler::getAll();
-        res.set_content(json, "application/json");
-    });
+   svr.Get("/api/transactions", [](const httplib::Request&, httplib::Response& res) {
+    std::string json = TransactionHandler::getAll();
+    std::cout << "GET /api/transactions - Returning: " << json << std::endl;
+    res.set_content(json, "application/json");
+});
 
     svr.Get("/api/transactions/product/:id", [](const httplib::Request& req, httplib::Response& res) {
         int id = std::stoi(req.path_params.at("id"));

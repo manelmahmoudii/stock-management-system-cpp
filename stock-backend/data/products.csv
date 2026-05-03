@@ -1,7 +1,7 @@
 id,name,category,price,quantity,minThreshold
-1,iPhone,Phone,1500.000000,9,3
-2,MacBook,Laptop,2000.000000,4,2
-3,Headphones,Audio,100,20,5
-4,Samsung,Phone,900.000000,12,3
-5,cyberesa,Phone,22.000000,2,5
-6,MacBookkkk,Laptop,2000.000000,100,5
+1,iPhone,Phone,1500.000000,5,3
+2,MacBook,Laptop,2000.000000,10,2
+3,Headphones,Audio,100.000000,13,5
+4,Samsung,Phone,900.000000,10,3
+5,cyberesa,Phone,22.000000,0,5
+6,MacBookkkk,Laptop,2000.000000,99,5
