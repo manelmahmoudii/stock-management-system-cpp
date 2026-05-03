@@ -28,6 +28,13 @@ export function AuthProvider({ children }) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Login failed');
 
+      const userData = { 
+    email, 
+    role: data.role,
+    firstName: data.firstName || null,  // À adapter selon votre API
+    lastName: data.lastName || null,     // À adapter selon votre API
+  };
+
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify({ email, role: data.role }));
     setUser({ email, role: data.role });

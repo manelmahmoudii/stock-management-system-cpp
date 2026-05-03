@@ -1,8 +1,24 @@
-import { useState } from "react";
-import { DropdownItem } from "../ui/dropdown/DropdownItem";
-import { Dropdown } from "../ui/dropdown/Dropdown";
+// src/components/header/UserDropdown.jsx
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+
+// Import des composants Dropdown (ajustez les chemins selon votre structure)
+// Si vous n'avez pas ces composants, créez-les ou utilisez une alternative
+const DropdownItem = ({ children, onClick }) => (
+  <button onClick={onClick} className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">
+    {children}
+  </button>
+);
+
+const Dropdown = ({ isOpen, onClose, children, className }) => {
+  if (!isOpen) return null;
+  return (
+    <div className={className} onMouseLeave={onClose}>
+      {children}
+    </div>
+  );
+};
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,19 +39,46 @@ export default function UserDropdown() {
     closeDropdown();
   };
 
+  // Fonction pour obtenir le nom d'affichage
+  const getDisplayName = () => {
+    if (!user) return "User";
+    
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    }
+    
+    if (user.email === "admin@example.com") return "Admin";
+    return user.email?.split("@")[0] || "User";
+  };
+
+  // Fonction pour obtenir les initiales
+  const getInitials = () => {
+    if (!user) return "U";
+    
+    if (user.firstName && user.lastName) {
+      return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
+    }
+    
+    if (user.firstName) return user.firstName[0].toUpperCase();
+    if (user.email) return user.email[0].toUpperCase();
+    return "U";
+  };
+
   return (
     <div className="relative">
       <button
         onClick={toggleDropdown}
         className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400"
       >
-        <span className="mr-3 overflow-hidden rounded-full h-11 w-11">
-          <img src="/images/user/owner.jpg" alt="User" />
-        </span>
-
+        {/* Avatar avec initiales */}
+        <div className="w-8 h-8 rounded-full bg-violet-500 flex items-center justify-center text-white font-medium mr-2">
+          {getInitials()}
+        </div>
+        
         <span className="block mr-1 font-medium text-theme-sm">
-          {user?.email === "admin@example.com" ? "Admin" : user?.email?.split("@")[0] || "User"}
+          {getDisplayName()}
         </span>
+        
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
@@ -63,14 +106,12 @@ export default function UserDropdown() {
       >
         <div>
           <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            {user?.email === "admin@example.com" ? "Admin" : user?.email?.split("@")[0] || "User"}
+            {getDisplayName()}
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
             {user?.email || "admin@example.com"}
           </span>
         </div>
-
-        {/* Suppression de tous les éléments (Edit profile, Account settings, Support) */}
 
         <button
           onClick={handleLogout}
