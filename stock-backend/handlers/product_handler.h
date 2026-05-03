@@ -185,67 +185,75 @@ static std::string sell(int id, const std::string& body, const httplib::Request&
     return "{\"error\":\"Product not found\"}";
 }
 
-    // product_handler.h - À l'intérieur de la classe ProductHandler
 
  // ─── DELIVER : livraison d'un produit (augmente la quantité) ─────────
-    static std::string deliver(int id, const std::string& body) {
-        printf("🔵 ===== DELIVER STARTED =====\n");
-        printf("📦 Product ID: %d\n", id);
-        printf("📦 Body: %s\n", body.c_str());
-        
-        auto params = parseBody(body);
-        
-        if (!params.count("quantity")) {
-            printf("❌ Quantity parameter missing\n");
-            return "{\"error\":\"Quantity parameter missing\"}";
-        }
-        
-        int qty = std::stoi(params["quantity"]);
-        printf("📊 Quantity to add: %d\n", qty);
-        
-        if (qty <= 0) {
-            printf("❌ Quantity must be positive\n");
-            return "{\"error\":\"Quantity must be positive\"}";
-        }
+static std::string deliver(int id, const std::string& body, const httplib::Request& req) {
+    printf(" ===== DELIVER STARTED =====\n");
+    printf(" Product ID: %d\n", id);
+    printf("Body: %s\n", body.c_str());
+    
+    auto params = parseBody(body);
+    
+    if (!params.count("quantity")) {
+        printf(" Quantity parameter missing\n");
+        return "{\"error\":\"Quantity parameter missing\"}";
+    }
+    
+    int qty = std::stoi(params["quantity"]);
+    printf(" Quantity to add: %d\n", qty);
+    
+    if (qty <= 0) {
+        printf(" Quantity must be positive\n");
+        return "{\"error\":\"Quantity must be positive\"}";
+    }
 
-        auto rows = SheetStorage::readAll(PRODUCTS_FILE);
-        printf("📋 CSV rows loaded: %zu\n", rows.size());
+    // Récupérer l'utilisateur admin depuis le token
+    auto [userId, userEmail] = getUserFromRequest(req);
+    
+    // Si pas de token ou token invalide, utiliser admin par défaut
+    if (userId == 0 || userEmail.empty()) {
+        userId = 1;  // ID admin par défaut
+        userEmail = "admin@example.com";
+    }
 
-        for (auto& row : rows) {
-            if (!row.empty()) {
-                int currentId = std::stoi(row[0]);
-                if (currentId == id) {
-                    printf("✅ Product found!\n");
-                    Product p = Product::fromRow(row);
-                    int oldStock = p.quantity;
-                    printf("📊 Old stock: %d\n", oldStock);
+    auto rows = SheetStorage::readAll(PRODUCTS_FILE);
+    printf(" CSV rows loaded: %zu\n", rows.size());
 
-                    p.quantity += qty;
-                    printf("📊 New stock: %d\n", p.quantity);
-                    
-                    row = p.toRow();
-                    SheetStorage::writeAll(PRODUCTS_FILE, PRODUCTS_HEADER, rows);
-                    printf("💾 CSV file saved\n");
+    for (auto& row : rows) {
+        if (!row.empty()) {
+            int currentId = std::stoi(row[0]);
+            if (currentId == id) {
+                printf("Product found!\n");
+                Product p = Product::fromRow(row);
+                int oldStock = p.quantity;
+                printf("Old stock: %d\n", oldStock);
 
-                    // Enregistrer la transaction de livraison
-                    printf("📝 Logging delivery transaction...\n");
-                    TransactionHandler::logTransaction("DELIVERY", id, p.name, qty, oldStock, p.quantity,
-                                                        p.price * qty, "COMPLETED");
-                    printf("✅ Transaction logged successfully\n");
+                p.quantity += qty;
+                printf("New stock: %d\n", p.quantity);
+                
+                row = p.toRow();
+                SheetStorage::writeAll(PRODUCTS_FILE, PRODUCTS_HEADER, rows);
+                printf("CSV file saved\n");
 
-                    std::string result = "{"
-                        "\"product\":" + p.toJson() + ","
-                        "\"message\":\"Stock updated successfully\","
-                        "\"oldStock\":" + std::to_string(oldStock) + ","
-                        "\"newStock\":" + std::to_string(p.quantity) +
-                    "}";
-                    printf("🎉 Result: %s\n", result.c_str());
-                    return result;
-                }
+                // Enregistrer la transaction de livraison avec l'admin
+                printf("Logging delivery transaction for admin: %s (ID: %d)\n", userEmail.c_str(), userId);
+                TransactionHandler::logTransaction("DELIVERY", id, p.name, qty, oldStock, p.quantity,
+                                                    p.price * qty, "COMPLETED", userId, userEmail);
+                printf("Transaction logged successfully\n");
+
+                std::string result = "{"
+                    "\"product\":" + p.toJson() + ","
+                    "\"message\":\"Stock updated successfully\","
+                    "\"oldStock\":" + std::to_string(oldStock) + ","
+                    "\"newStock\":" + std::to_string(p.quantity) +
+                "}";
+                printf("Result: %s\n", result.c_str());
+                return result;
             }
         }
-        
-        printf("❌ Product not found with ID: %d\n", id);
-        return "{\"error\":\"Product not found\"}";
     }
+    
+    printf("Product not found with ID: %d\n", id);
+    return "{\"error\":\"Product not found\"}";
+}
 };

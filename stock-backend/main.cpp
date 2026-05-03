@@ -70,10 +70,10 @@ int main() {
     res.set_content(ProductHandler::sell(id, req.body, req), "application/json");
 });
 
-    svr.Post("/api/products/:id/deliver", [](const httplib::Request& req, httplib::Response& res) {
-        int id = std::stoi(req.path_params.at("id"));
-        res.set_content(ProductHandler::deliver(id, req.body), "application/json");
-    });
+   svr.Post("/api/products/:id/deliver", [](const httplib::Request& req, httplib::Response& res) {
+    int id = std::stoi(req.path_params.at("id"));
+    res.set_content(ProductHandler::deliver(id, req.body, req), "application/json");
+});
 
     // ──────────── ROUTES TRANSACTIONS ────────────
    svr.Get("/api/transactions", [](const httplib::Request&, httplib::Response& res) {

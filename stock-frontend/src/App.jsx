@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
@@ -22,71 +24,158 @@ import Home from "./pages/Dashboard/Home";
 import ClientPage from "./pages/Client/ClientPage";
 import ShopPage from './pages/Client/ShopPage';
 import DeliveryManagement from "./pages/DeliveryManagement";
-
 import ProductsAdmin from "./pages/ProductsAdmin";
 import TransactionAdmin from "./pages/TransactionsAdmin";
 import AddProducts from "./pages/AddProducts";
-
 import EditProduct from "./pages/EditProduct";
-
-import UserList from "./pages/AuthPages/UserList"
-
+import UserList from "./pages/AuthPages/UserList";
 
 export default function App() {
   return (
     <Router
       future={{
-        v7_startTransition: true,       // ✅ supprime warning 1
-        v7_relativeSplatPath: true,     // ✅ supprime warning 2
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
       }}
     >
-      <ScrollToTop />
-      <Routes>
+      <AuthProvider>
+        <ScrollToTop />
+        <Routes>
+          {/* Routes Admin (protégées, nécessitent rôle admin) */}
+          <Route element={<AppLayout />}>
+            <Route index path="/" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Home />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <UserProfiles />
+              </ProtectedRoute>
+            } />
+            <Route path="/calendar" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Calendar />
+              </ProtectedRoute>
+            } />
+            <Route path="/blank" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Blank />
+              </ProtectedRoute>
+            } />
+            <Route path="/template" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Template />
+              </ProtectedRoute>
+            } />
+            <Route path="/form-elements" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <FormElements />
+              </ProtectedRoute>
+            } />
+            <Route path="/basic-tables" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <BasicTables />
+              </ProtectedRoute>
+            } />
+            <Route path="/alerts" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Alerts />
+              </ProtectedRoute>
+            } />
+            <Route path="/avatars" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Avatars />
+              </ProtectedRoute>
+            } />
+            <Route path="/badge" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Badges />
+              </ProtectedRoute>
+            } />
+            <Route path="/buttons" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Buttons />
+              </ProtectedRoute>
+            } />
+            <Route path="/images" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Images />
+              </ProtectedRoute>
+            } />
+            <Route path="/videos" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Videos />
+              </ProtectedRoute>
+            } />
+            <Route path="/line-chart" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <LineChart />
+              </ProtectedRoute>
+            } />
+            <Route path="/bar-chart" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <BarChart />
+              </ProtectedRoute>
+            } />
+            
+            {/* Routes Admin - Produits */}
+            <Route path="/ProductsAdmin" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <ProductsAdmin />
+              </ProtectedRoute>
+            } />
+            <Route path="/ProductsAdmin/AddProducts" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AddProducts />
+              </ProtectedRoute>
+            } />
+            <Route path="/ProductsAdmin/EditProduct/:id" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <EditProduct />
+              </ProtectedRoute>
+            } />
+            
+            {/* Routes Admin - Transactions et Livraisons */}
+            <Route path="/transactionsAdmin" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <TransactionAdmin />
+              </ProtectedRoute>
+            } />
+            <Route path="/delivery" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <DeliveryManagement />
+              </ProtectedRoute>
+            } />
+            
+            {/* Routes Admin - Utilisateurs */}
+            <Route path="/UserList" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <UserList />
+              </ProtectedRoute>
+            } />
+          </Route>
 
-        {/* Dashboard Layout - Admin */}
-        <Route element={<AppLayout />}>
-          <Route index path="/" element={<Home />} />
-          <Route path="/profile" element={<UserProfiles />} />
-          <Route path="/calendar" element={<Calendar />} />
-          <Route path="/blank" element={<Blank />} />
-          <Route path="/template" element={<Template />} />
-          <Route path="/error-404" element={<NotFound />} />
-          <Route path="/form-elements" element={<FormElements />} />
-          <Route path="/basic-tables" element={<BasicTables />} />
-          <Route path="/alerts" element={<Alerts />} />
-          <Route path="/avatars" element={<Avatars />} />
-          <Route path="/badge" element={<Badges />} />
-          <Route path="/buttons" element={<Buttons />} />
-          <Route path="/images" element={<Images />} />
-          <Route path="/videos" element={<Videos />} />
-          <Route path="/line-chart" element={<LineChart />} />
-          <Route path="/bar-chart" element={<BarChart />} />
-          <Route path="/ProductsAdmin" element={<ProductsAdmin />} />
-          <Route path="/transactionsAdmin" element={<TransactionAdmin />} />
-          <Route path="/ProductsAdmin/AddProducts" element={<AddProducts />} />
+          {/* Routes Client (protégées, nécessitent rôle client ou admin) */}
+          <Route path="/client" element={
+            <ProtectedRoute allowedRoles={['client']}>
+              <ClientPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/shop" element={
+            <ProtectedRoute allowedRoles={['client']}>
+              <ShopPage />
+            </ProtectedRoute>
+          } />
 
-          <Route path="UserList" element={<UserList />} />  {/* ← ajouter */}
+          {/* Routes Auth (publiques) */}
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
 
-
-          <Route path="/ProductsAdmin/EditProduct/:id" element={<EditProduct />} />
-<Route path="/delivery" element={<DeliveryManagement />} />
-        </Route>
-
-        {/* ✅ Interface Client - HORS AppLayout */}
-        <Route path="/client" element={<ClientPage />} />
-        <Route path="/shop" element={<ShopPage />} />
-
-        
-
-
-        {/* Auth */}
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
-
-        {/* Fallback */}
-        <Route path="*" element={<NotFound />} />
-
-      </Routes>
+          {/* Fallback */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </AuthProvider>
     </Router>
   );
 }

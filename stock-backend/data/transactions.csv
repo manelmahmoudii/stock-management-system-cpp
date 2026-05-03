@@ -2,4 +2,4 @@ id,type,productId,productName,quantity,oldStock,newStock,amount,date,status,user
 5,SALE,1,iPhone,1,6,5,1500.000000,2026-05-03 12:51:10,COMPLETED,4,manelmahmoudi03@gmail.com
 6,SALE,3,Headphones,1,14,13,100.000000,2026-05-03 13:13:15,COMPLETED,5,meissenmiled@gmail.com
 
-12,DELIVERY,2,MacBook,10,0,10,20000.000000,2026-05-03 13:19:48,COMPLETED,0,system
+13,DELIVERY,5,cyberesa,10,0,10,220.000000,2026-05-03 13:26:27,COMPLETED,1,admin@example.com

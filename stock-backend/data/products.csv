@@ -3,5 +3,5 @@ id,name,category,price,quantity,minThreshold
 2,MacBook,Laptop,2000.000000,10,2
 3,Headphones,Audio,100.000000,13,5
 4,Samsung,Phone,900.000000,10,3
-5,cyberesa,Phone,22.000000,0,5
+5,cyberesa,Phone,22.000000,10,5
 6,MacBookkkk,Laptop,2000.000000,99,5

@@ -1,6 +1,6 @@
 // src/componentsClient/CartDrawer.jsx
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const API = 'http://localhost:8081/api';
 
@@ -13,6 +13,7 @@ export default function CartDrawer({
 }) {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutMsg, setCheckoutMsg] = useState('');
+  const navigate = useNavigate();
 
   // Calcul du sous-total et total
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -21,16 +22,48 @@ export default function CartDrawer({
   // Récupérer le token JWT
   const getToken = () => localStorage.getItem('token');
 
+  // Vérifier si le token est expiré
+  const isTokenExpired = (token) => {
+    if (!token) return true;
+    try {
+      const payload = token.split('.')[1];
+      const decoded = JSON.parse(atob(payload));
+      if (!decoded.exp) return true;
+      const expirationTime = decoded.exp * 1000;
+      return Date.now() >= expirationTime;
+    } catch (error) {
+      console.error('Token validation error:', error);
+      return true;
+    }
+  };
+
+  // Rediriger vers la page de connexion et nettoyer la session
+  const redirectToLogin = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/signin');
+  };
+
   // ── Checkout : vend chaque article via l'API ─────────────────────────
   const handleCheckout = async () => {
     if (cartItems.length === 0) return;
     
     const token = getToken();
+    
+    // Vérification du token
     if (!token) {
       setCheckoutMsg('⚠️ Veuillez vous connecter pour passer commande');
-      // Option: rediriger vers la page de connexion après 2 secondes
       setTimeout(() => {
-        window.location.href = '/login';
+        redirectToLogin();
+      }, 2000);
+      return;
+    }
+    
+    // Vérifier l'expiration du token
+    if (isTokenExpired(token)) {
+      setCheckoutMsg('⚠️ Session expirée, veuillez vous reconnecter');
+      setTimeout(() => {
+        redirectToLogin();
       }, 2000);
       return;
     }
@@ -47,16 +80,25 @@ export default function CartDrawer({
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': `Bearer ${token}`,  // ← Ajout du token
+            'Authorization': `Bearer ${token}`,
           },
           body: body,
         });
+        
+        // Si le serveur retourne 401 Unauthorized (token expiré ou invalide)
+        if (res.status === 401) {
+          setCheckoutMsg('⚠️ Session expirée, veuillez vous reconnecter');
+          setTimeout(() => {
+            redirectToLogin();
+          }, 2000);
+          return;
+        }
+        
         const data = await res.json();
 
         if (data.error) {
           errors.push(`${item.name} : ${data.error}`);
         } else {
-          // Transaction disponible pour Personne 3
           console.log('✅ Transaction enregistrée :', data.transaction);
         }
       } catch (error) {
@@ -70,7 +112,6 @@ export default function CartDrawer({
       setCheckoutMsg('⚠️ ' + errors.join(' | '));
     } else {
       setCheckoutMsg('✅ Commande confirmée ! Merci pour votre achat.');
-      // Vide le panier après succès
       setTimeout(() => {
         cartItems.forEach(item => removeItem(item.id));
         setCheckoutMsg('');

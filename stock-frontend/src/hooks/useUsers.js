@@ -1,7 +1,30 @@
+// src/hooks/useUsers.js
 import { useState, useEffect } from 'react';
 
 const API_BASE = 'http://localhost:8081/api';
 const API_USERS = `${API_BASE}/users`;
+
+// Fonction de vérification du token
+const checkTokenAndRedirect = () => {
+  const token = localStorage.getItem('token');
+  if (!token) return false;
+  
+  try {
+    const payload = token.split('.')[1];
+    const decoded = JSON.parse(atob(payload));
+    const expirationTime = decoded.exp * 1000;
+    
+    if (Date.now() >= expirationTime) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/signin';
+      return false;
+    }
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
 
 export function useUsers() {
   const [users, setUsers] = useState([]);
@@ -11,11 +34,13 @@ export function useUsers() {
   const getToken = () => localStorage.getItem('token');
 
   const fetchUsers = async () => {
-    const token = getToken();
+    if (!checkTokenAndRedirect()) {
+      setLoading(false);
+      return;
+    }
     
-    // Si pas de token, ne pas faire la requête
+    const token = getToken();
     if (!token) {
-      console.log("No token found, skipping fetchUsers");
       setLoading(false);
       return;
     }
@@ -24,8 +49,6 @@ export function useUsers() {
       setLoading(true);
       setError(null);
       
-      console.log("Fetching users with token:", token.substring(0, 20) + "...");
-      
       const res = await fetch(API_USERS, {
         method: 'GET',
         headers: {
@@ -33,8 +56,6 @@ export function useUsers() {
           'Content-Type': 'application/json'
         }
       });
-      
-      console.log("Response status:", res.status);
       
       if (!res.ok) {
         if (res.status === 401) {
@@ -54,15 +75,15 @@ export function useUsers() {
   };
 
   useEffect(() => {
-    // Attendre un peu pour que le token soit disponible
     const timer = setTimeout(() => {
       fetchUsers();
     }, 100);
-    
     return () => clearTimeout(timer);
   }, []);
 
   const deleteUser = async (userId) => {
+    if (!checkTokenAndRedirect()) throw new Error("Session expirée");
+    
     const token = getToken();
     if (!token) throw new Error("Non authentifié");
 
