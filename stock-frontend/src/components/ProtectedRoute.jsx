@@ -30,7 +30,7 @@ export default function ProtectedRoute({ children, allowedRoles = [] }) {
   if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
     // Rediriger selon le rôle
     if (user?.role === 'admin') {
-      return <Navigate to="/" replace />;
+      return <Navigate to="/dashboard" replace />;
     } else {
       return <Navigate to="/client" replace />;
     }
